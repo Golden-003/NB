@@ -1,0 +1,502 @@
+    60→    60→    60→  show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] } },
+    61→    61→    61→}
+    62→    62→    62→
+    63→    63→    63→/* ─── NAV LINKS ─── */
+    64→    64→    64→const NAV_LINKS = [
+    65→    65→    65→  { label: 'Accueil', href: '#accueil' },
+    66→    66→    66→  { label: 'Construire en Terre Cuite', href: '#avantages' },
+    67→    67→    67→  { label: 'Nos Solutions', href: '#solutions' },
+    68→    68→    68→  { label: 'Nos Travaux', href: '#travaux' },
+    69→    69→    69→  { label: 'Services', href: '#services' },
+    70→    70→    70→  { label: 'À propos', href: '#apropos' },
+    71→    71→    71→  { label: 'Contact', href: '#contact' },
+    72→    72→    72→]
+    73→    73→    73→
+    74→    74→    74→/* ─── AVANTAGES DATA ─── */
+    75→    75→    75→const AVANTAGES = [
+    76→    76→    76→  {
+    77→    77→    77→    icon: Thermometer,
+    78→    78→    78→    title: 'Confort Thermique',
+    79→    79→    79→    desc: "La terre cuite régule naturellement la température intérieure, gardant votre maison fraîche en saison chaude et douce en saison fraîche. Jusqu'à 8°C de différence avec le béton.",
+    80→    80→    80→  },
+    81→    81→    81→  {
+    82→    82→    82→    icon: Volume2,
+    83→    83→    83→    title: 'Isolation Acoustique',
+    84→    84→    84→    desc: "Grâce à sa structure poreuse, la brique en terre cuite absorbe les bruits et offre un isolement phonique supérieur pour un cadre de vie paisible.",
+    85→    85→    85→  },
+    86→    86→    86→  {
+    87→    87→    87→    icon: Flame,
+    88→    88→    88→    title: 'Résistance au Feu',
+    89→    89→    89→    desc: "Incombustible par nature, la terre cuite résiste aux températures élevées et protège votre famille et vos biens.",
+    90→    90→    90→  },
+    91→    91→    91→  {
+    92→    92→    92→    icon: Zap,
+    93→    93→    93→    title: 'Performance Énergétique',
+    94→    94→    94→    desc: "Moins de climatisation, moins de chauffage. Les bâtiments en terre cuite consomment jusqu'à 30% d'énergie en moins.",
+    95→    95→    95→  },
+    96→    96→    96→  {
+    97→    97→    97→    icon: Shield,
+    98→    98→    98→    title: 'Durabilité Exceptionnelle',
+    99→    99→    99→    desc: "Les constructions en terre cuite traversent les décennies sans perdre ni leur solidité ni leur beauté.",
+   100→   100→   100→  },
+   101→   101→   101→  {
+   102→   102→   102→    icon: Leaf,
+   103→   103→   103→    title: "Respect de l'Environnement",
+   104→   104→   104→    desc: "Matériau 100% naturel, recyclable et local. Un bilan carbone largement inférieur au béton.",
+   105→   105→   105→  },
+   106→   106→   106→]
+   107→   107→   107→
+   108→   108→   108→/* ─── SOLUTIONS DATA ─── */
+   109→   109→   109→const SOLUTIONS = [
+   110→   110→   110→  {
+   111→   111→   111→    title: 'Briques Porteuses',
+   112→   112→   112→    desc: 'Briques structurelles haute résistance pour les murs porteurs de votre bâtiment.',
+   113→   113→   113→    img: 'https://sfile.chatglm.cn/images-ppt/c12fbbe6e423.jpg',
+   114→   114→   114→    alt: 'Briques porteuses en terre cuite Nature Brique',
+   115→   115→   115→    tag: 'Structure',
+   116→   116→   116→  },
+   117→   117→   117→  {
+   118→   118→   118→    title: 'Briques de Parement',
+   119→   119→   119→    desc: 'Finitions décoratives qui donnent caractère et élégance à vos façades.',
+   120→   120→   120→    img: 'https://sfile.chatglm.cn/images-ppt/1d19b42ca88b.jpg',
+   121→   121→   121→    alt: 'Briques de parement décoratives en terre cuite',
+   122→   122→   122→    tag: 'Finition',
+   123→   123→   123→  },
+   124→   124→   124→  {
+   125→   125→   125→    title: 'Pavés & Dalles',
+   126→   126→   126→    desc: "Aménagements extérieurs durables qui allient esthétique et robustesse.",
+   127→   127→   127→    img: 'https://sfile.chatglm.cn/images-ppt/acc3564a28d5.jpg',
+   128→   128→   128→    alt: 'Pavés et dalles en terre cuite pour aménagement extérieur',
+   129→   129→   129→    tag: 'Extérieur',
+   130→   130→   130→  },
+   131→   131→   131→  {
+   132→   132→   132→    title: 'Hourdis & Accessoires',
+   133→   133→   133→    desc: 'Solutions complètes pour votre chantier : hourdis, linteaux, claustras.',
+   134→   134→   134→    img: 'https://sfile.chatglm.cn/images-ppt/cdb6770829c1.jpg',
+   135→   135→   135→    alt: 'Hourdis et accessoires en terre cuite',
+   136→   136→   136→    tag: 'Complément',
+   137→   137→   137→  },
+   138→   138→   138→]
+   139→   139→   139→
+   140→   140→   140→/* ─── TRAVAUX DATA ─── */
+   141→   141→   141→const TRAVAUX = [
+   142→   142→   142→  {
+   143→   143→   143→    title: 'Villa Résidentielle à Cotonou',
+   144→   144→   144→    desc: "Une villa moderne où la brique en terre cuite crée une ambiance fraîche et contemporaine. Confort thermique optimal sans climatisation excessive.",
+   145→   145→   145→    img: 'https://sfile.chatglm.cn/images-ppt/996e4d038810.jpg',
+   146→   146→   146→    alt: 'Villa résidentielle construite en briques terre cuite à Cotonou',
+   147→   147→   147→    category: 'Résidentiel',
+   148→   148→   148→  },
+   149→   149→   149→  {
+   150→   150→   150→    title: 'Bâtiment Public à Zogbodomey',
+   151→   151→   151→    desc: "Un édifice public construit entièrement en briques Nature Brique, démontrant la fiabilité de nos produits pour les projets institutionnels.",
+   152→   152→   152→    img: 'https://sfile.chatglm.cn/images-ppt/a0fd4170d85d.jpg',
+   153→   153→   153→    alt: 'Bâtiment public en terre cuite à Zogbodomey',
+   154→   154→   154→    category: 'Institutionnel',
+   155→   155→   155→  },
+   156→   156→   156→  {
+   157→   157→   157→    title: 'Complexe Scolaire',
+   158→   158→   158→    desc: "Des salles de classe fraîches et saines grâce à la terre cuite, offrant un environnement d'apprentissage optimal pour les élèves.",
+   159→   159→   159→    img: 'https://sfile.chatglm.cn/images-ppt/c084aece8f33.jpeg',
+   160→   160→   160→    alt: 'Complexe scolaire construit en briques terre cuite',
+   161→   161→   161→    category: 'Éducation',
+   162→   162→   162→  },
+   163→   163→   163→]
+   164→   164→   164→
+   165→   165→   165→/* ─── SERVICES DATA ─── */
+   166→   166→   166→const SERVICES = [
+   167→   167→   167→  {
+   168→   168→   168→    icon: Compass,
+   169→   169→   169→    title: 'Études Techniques',
+   170→   170→   170→    desc: "Notre équipe d'ingénieurs vous accompagne dans la conception de votre projet avec des solutions optimisées en terre cuite.",
+   171→   171→   171→    for: 'Architectes & Promoteurs',
+   172→   172→   172→  },
+   173→   173→   173→  {
+   174→   174→   174→    icon: HardHat,
+   175→   175→   175→    title: 'Eco-Build',
+   176→   176→   176→    desc: "Notre partenaire Eco-Build vous propose une approche globale de la construction écologique, de l'architecture aux finitions.",
+   177→   177→   177→    for: 'Tous porteurs de projet',
+   178→   178→   178→  },
+   179→   179→   179→  {
+   180→   180→   180→    icon: GraduationCap,
+   181→   181→   181→    title: 'Formation',
+   182→   182→   182→    desc: "Des sessions de formation pour vos équipes de maçons et entrepreneurs sur les techniques de pose de la brique en terre cuite.",
+   183→   183→   183→    for: 'Entreprises & Artisans',
+   184→   184→   184→  },
+   185→   185→   185→  {
+   186→   186→   186→    icon: CheckCircle,
+   187→   187→   187→    title: 'Assistance Chantier',
+   188→   188→   188→    desc: "Un suivi technique sur vos chantiers pour garantir la qualité de la mise en oeuvre et le respect des normes.",
+   189→   189→   189→    for: 'Tous clients',
+   190→   190→   190→  },
+   191→   191→   191→]
+   192→   192→   192→
+   193→   193→   193→/* ─── Counter Animation ─── */
+   194→   194→   194→function AnimatedCounter({ target, suffix = '' }: { target: string; suffix?: string }) {
+   195→   195→   195→  const ref = useRef<HTMLSpanElement>(null)
+   196→   196→   196→  const isInView = useInView(ref, { once: true })
+   197→   197→   197→  const [display, setDisplay] = useState('0')
+   198→   198→   198→
+   199→   199→   199→  useEffect(() => {
+   200→   200→   200→    if (!isInView) return
+   201→   201→   201→    const num = parseInt(target)
+   202→   202→   202→    if (isNaN(num)) {
+   203→   203→   203→      setDisplay(target)
+   204→   204→   204→      return
+   205→   205→   205→    }
+   206→   206→   206→    let start = 0
+   207→   207→   207→    const duration = 1800
+   208→   208→   208→    const stepTime = duration / num
+   209→   209→   209→    const timer = setInterval(() => {
+   210→   210→   210→      start += 1
+   211→   211→   211→      setDisplay(String(start))
+   212→   212→   212→      if (start >= num) clearInterval(timer)
+   213→   213→   213→    }, Math.max(stepTime, 16))
+   214→   214→   214→    return () => clearInterval(timer)
+   215→   215→   215→  }, [isInView, target])
+   216→   216→   216→
+   217→   217→   217→  return (
+   218→   218→   218→    <span ref={ref}>
+   219→   219→   219→      {display}{suffix}
+   220→   220→   220→    </span>
+   221→   221→   221→  )
+   222→   222→   222→}
+   223→   223→   223→
+   224→   224→   224→/* ═══════════════════════════════════════════════════════════════
+   225→   225→   225→   MAIN PAGE COMPONENT
+   226→   226→   226→   ═══════════════════════════════════════════════════════════════ */
+   227→   227→   227→export default function Home() {
+   228→   228→   228→  const [scrolled, setScrolled] = useState(false)
+   229→   229→   229→  const [mobileOpen, setMobileOpen] = useState(false)
+   230→   230→   230→
+   231→   231→   231→  const handleScroll = useCallback(() => {
+   232→   232→   232→    setScrolled(window.scrollY > 60)
+   233→   233→   233→  }, [])
+   234→   234→   234→
+   235→   235→   235→  useEffect(() => {
+   236→   236→   236→    window.addEventListener('scroll', handleScroll, { passive: true })
+   237→   237→   237→    return () => window.removeEventListener('scroll', handleScroll)
+   238→   238→   238→  }, [handleScroll])
+   239→   239→   239→
+   240→   240→   240→  useEffect(() => {
+   241→   241→   241→    const onResize = () => {
+   242→   242→   242→      if (window.innerWidth >= 1024) setMobileOpen(false)
+   243→   243→   243→    }
+   244→   244→   244→    window.addEventListener('resize', onResize)
+   245→   245→   245→    return () => window.removeEventListener('resize', onResize)
+   246→   246→   246→  }, [])
+   247→   247→   247→
+   248→   248→   248→  useEffect(() => {
+   249→   249→   249→    document.body.style.overflow = mobileOpen ? 'hidden' : ''
+   250→   250→   250→    return () => { document.body.style.overflow = '' }
+   251→   251→   251→  }, [mobileOpen])
+   252→   252→   252→
+   253→   253→   253→  return (
+   254→   254→   254→    <div className="min-h-screen flex flex-col bg-cream font-sans text-earth">
+   255→   255→   255→      {/* ─── 1. HEADER ─── */}
+   256→   256→   256→      <header
+   257→   257→   257→        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+   258→   258→   258→          scrolled
+   259→   259→   259→            ? 'bg-white/95 backdrop-blur-md shadow-[0_1px_20px_rgba(45,27,14,0.06)]'
+   260→   260→   260→            : 'bg-transparent'
+   261→   261→   261→        }`}
+   262→   262→   262→      >
+   263→   263→   263→        <div className="mx-auto max-w-7xl flex items-center justify-between px-5 sm:px-6 lg:px-8 h-16 md:h-20">
+   264→   264→   264→          <a href="#accueil" className="relative shrink-0" aria-label="Nature Brique - Accueil">
+   265→   265→   265→            <Image
+   266→   266→   266→              src={scrolled ? '/images/logo.png' : '/images/logo-white.png'}
+   267→   267→   267→              alt="Nature Brique"
+   268→   268→   268→              width={140}
+   269→   269→   269→              height={60}
+   270→   270→   270→              priority
+   271→   271→   271→              className="h-9 w-auto md:h-11 lg:h-12 object-contain transition-all duration-300"
+   272→   272→   272→            />
+   273→   273→   273→          </a>
+   274→   274→   274→
+   275→   275→   275→          <nav className="hidden lg:flex items-center gap-7 xl:gap-8">
+   276→   276→   276→            {NAV_LINKS.map((l) => (
+   277→   277→   277→              <a
+   278→   278→   278→                key={l.href}
+   279→   279→   279→                href={l.href}
+   280→   280→   280→                className={`text-[13px] tracking-wide uppercase transition-colors duration-300 ${
+   281→   281→   281→                  scrolled
+   282→   282→   282→                    ? 'text-earth-light hover:text-terracotta'
+   283→   283→   283→                    : 'text-white/80 hover:text-white'
+   284→   284→   284→                }`}
+   285→   285→   285→              >
+   286→   286→   286→                {l.label}
+   287→   287→   287→              </a>
+   288→   288→   288→            ))}
+   289→   289→   289→          </nav>
+   290→   290→   290→
+   291→   291→   291→          <a
+   292→   292→   292→            href="#contact"
+   293→   293→   293→            className={`hidden lg:inline-flex items-center rounded-full px-6 py-2.5 text-[13px] tracking-wide uppercase font-medium transition-all duration-300 hover:scale-[1.03] ${
+   294→   294→   294→              scrolled
+   295→   295→   295→                ? 'bg-terracotta text-white hover:bg-terracotta-dark shadow-sm'
+   296→   296→   296→                : 'bg-white/15 text-white border border-white/30 hover:bg-white/25 backdrop-blur-sm'
+   297→   297→   297→            }`}
+   298→   298→   298→          >
+   299→   299→   299→            Demander un devis
+   300→   300→   300→          </a>
+   301→   301→   301→
+   302→   302→   302→          <button
+   303→   303→   303→            onClick={() => setMobileOpen(!mobileOpen)}
+   304→   304→   304→            className="lg:hidden p-2 rounded-md"
+   305→   305→   305→            aria-label={mobileOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
+   306→   306→   306→          >
+   307→   307→   307→            {mobileOpen ? (
+   308→   308→   308→              <X className={`h-6 w-6 transition-colors ${scrolled ? 'text-earth' : 'text-white'}`} />
+   309→   309→   309→            ) : (
+   310→   310→   310→              <Menu className={`h-6 w-6 transition-colors ${scrolled ? 'text-earth' : 'text-white'}`} />
+   311→   311→   311→            )}
+   312→   312→   312→          </button>
+   313→   313→   313→        </div>
+   314→   314→   314→
+   315→   315→   315→        <AnimatePresence>
+   316→   316→   316→          {mobileOpen && (
+   317→   317→   317→            <motion.div
+   318→   318→   318→              initial={{ opacity: 0, height: 0 }}
+   319→   319→   319→              animate={{ opacity: 1, height: 'auto' }}
+   320→   320→   320→              exit={{ opacity: 0, height: 0 }}
+   321→   321→   321→              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+   322→   322→   322→              className="lg:hidden bg-white border-t border-cream-dark/60 overflow-hidden"
+   323→   323→   323→            >
+   324→   324→   324→              <nav className="flex flex-col px-6 py-5">
+   325→   325→   325→                {NAV_LINKS.map((l, i) => (
+   326→   326→   326→                  <motion.a
+   327→   327→   327→                    key={l.href}
+   328→   328→   328→                    href={l.href}
+   329→   329→   329→                    onClick={() => setMobileOpen(false)}
+   330→   330→   330→                    initial={{ opacity: 0, x: -12 }}
+   331→   331→   331→                    animate={{ opacity: 1, x: 0 }}
+   332→   332→   332→                    transition={{ delay: i * 0.04 }}
+   333→   333→   333→                    className="py-3 text-sm text-earth/80 hover:text-terracotta transition-colors border-b border-cream-dark/40 last:border-0"
+   334→   334→   334→                  >
+   335→   335→   335→                    {l.label}
+   336→   336→   336→                  </motion.a>
+   337→   337→   337→                ))}
+   338→   338→   338→                <a
+   339→   339→   339→                  href="#contact"
+   340→   340→   340→                  onClick={() => setMobileOpen(false)}
+   341→   341→   341→                  className="mt-4 inline-flex items-center justify-center rounded-full bg-terracotta px-6 py-3 text-sm font-medium text-white transition-all hover:bg-terracotta-dark"
+   342→   342→   342→                >
+   343→   343→   343→                  Demander un devis
+   344→   344→   344→                </a>
+   345→   345→   345→              </nav>
+   346→   346→   346→            </motion.div>
+   347→   347→   347→          )}
+   348→   348→   348→        </AnimatePresence>
+   349→   349→   349→      </header>
+   350→   350→   350→
+   351→   351→   351→      <main className="flex-1">
+   352→   352→   352→        {/* ─── 2. HERO ─── */}
+   353→   353→   353→        <section id="accueil" className="relative min-h-screen flex items-center overflow-hidden">
+   354→   354→   354→          <div className="absolute inset-0">
+   355→   355→   355→            <img
+   356→   356→   356→              src="https://sfile.chatglm.cn/images-ppt/71994ed677c7.jpg"
+   357→   357→   357→              alt="Bâtiment moderne construit en briques terre cuite"
+   358→   358→   358→              className="w-full h-full object-cover scale-105"
+   359→   359→   359→              loading="eager"
+   360→   360→   360→            />
+   361→   361→   361→            <div className="hero-overlay absolute inset-0" />
+   362→   362→   362→          </div>
+   363→   363→   363→
+   364→   364→   364→          <div className="relative z-10 mx-auto max-w-7xl w-full px-5 sm:px-6 lg:px-8 py-32 md:py-40">
+   365→   365→   365→            <div className="max-w-2xl">
+   366→   366→   366→              <motion.p
+   367→   367→   367→                initial={{ opacity: 0, y: 20 }}
+   368→   368→   368→                animate={{ opacity: 1, y: 0 }}
+   369→   369→   369→                transition={{ duration: 0.7, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+   370→   370→   370→                className="inline-block text-mint font-heading text-xs md:text-sm tracking-[0.25em] uppercase mb-5 pb-1 border-b border-mint/30"
+   371→   371→   371→              >
+   372→   372→   372→                Construisons notre monde écologique
+   373→   373→   373→              </motion.p>
+   374→   374→   374→
+   375→   375→   375→              <motion.h1
+   376→   376→   376→                initial={{ opacity: 0, y: 30 }}
+   377→   377→   377→                animate={{ opacity: 1, y: 0 }}
+   378→   378→   378→                transition={{ duration: 0.8, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
+   379→   379→   379→                className="font-heading text-[2.5rem] sm:text-5xl md:text-6xl lg:text-7xl text-white leading-[1.1] mb-7"
+   380→   380→   380→              >
+   381→   381→   381→                La terre cuite,
+   382→   382→   382→                <br />
+   383→   383→   383→                <span className="text-terracotta-light">un art de construire</span>
+   384→   384→   384→              </motion.h1>
+   385→   385→   385→
+   386→   386→   386→              <motion.p
+   387→   387→   387→                initial={{ opacity: 0, y: 20 }}
+   388→   388→   388→                animate={{ opacity: 1, y: 0 }}
+   389→   389→   389→                transition={{ duration: 0.7, delay: 0.7, ease: [0.22, 1, 0.36, 1] }}
+   390→   390→   390→                className="text-white/80 text-base md:text-lg lg:text-xl leading-relaxed mb-10 max-w-xl"
+   391→   391→   391→              >
+   392→   392→   392→                Depuis 2011, Nature Brique fabrique au Bénin des briques en terre
+   393→   393→   393→                cuite qui allient confort thermique, durabilité et esthétique.
+   394→   394→   394→                Construisons ensemble un avenir plus sain.
+   395→   395→   395→              </motion.p>
+   396→   396→   396→
+   397→   397→   397→              <motion.div
+   398→   398→   398→                initial={{ opacity: 0, y: 20 }}
+   399→   399→   399→                animate={{ opacity: 1, y: 0 }}
+   400→   400→   400→                transition={{ duration: 0.7, delay: 0.9 }}
+   401→   401→   401→                className="flex flex-wrap gap-4"
+   402→   402→   402→              >
+   403→   403→   403→                <a
+   404→   404→   404→                  href="#solutions"
+   405→   405→   405→                  className="group inline-flex items-center gap-2 rounded-full bg-terracotta pl-7 pr-6 py-3.5 text-white font-heading text-sm transition-all duration-300 hover:bg-terracotta-dark hover:shadow-lg hover:shadow-terracotta/20"
+   406→   406→   406→                >
+   407→   407→   407→                  Découvrir nos solutions
+   408→   408→   408→                  <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+   409→   409→   409→                </a>
+   410→   410→   410→                <a
+   411→   411→   411→                  href="#contact"
+   412→   412→   412→                  className="inline-flex items-center rounded-full border border-white/40 px-7 py-3.5 text-white font-heading text-sm backdrop-blur-sm transition-all duration-300 hover:bg-white/10 hover:border-white/60"
+   413→   413→   413→                >
+   414→   414→   414→                  Demander un devis
+   415→   415→   415→                </a>
+   416→   416→   416→              </motion.div>
+   417→   417→   417→            </div>
+   418→   418→   418→          </div>
+   419→   419→   419→
+   420→   420→   420→          <motion.div
+   421→   421→   421→            initial={{ opacity: 0 }}
+   422→   422→   422→            animate={{ opacity: 1 }}
+   423→   423→   423→            transition={{ delay: 1.4, duration: 1 }}
+   424→   424→   424→            className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10"
+   425→   425→   425→          >
+   426→   426→   426→            <a
+   427→   427→   427→              href="#avantages"
+   428→   428→   428→              className="flex flex-col items-center gap-1.5 text-white/40 hover:text-white/70 transition-colors"
+   429→   429→   429→              aria-label="Défiler vers le bas"
+   430→   430→   430→            >
+   431→   431→   431→              <span className="text-[10px] tracking-[0.2em] uppercase">Découvrir</span>
+   432→   432→   432→              <motion.div
+   433→   433→   433→                animate={{ y: [0, 6, 0] }}
+   434→   434→   434→                transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
+   435→   435→   435→              >
+   436→   436→   436→                <ArrowDown className="h-4 w-4" />
+   437→   437→   437→              </motion.div>
+   438→   438→   438→            </a>
+   439→   439→   439→          </motion.div>
+   440→   440→   440→        </section>
+   441→   441→   441→
+   442→   442→   442→        {/* ─── 3. AVANTAGES ─── */}
+   443→   443→   443→        <section id="avantages" className="bg-cream-dark py-24 md:py-32">
+   444→   444→   444→          <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
+   445→   445→   445→            <motion.div
+   446→   446→   446→              initial={{ opacity: 0, y: 24 }}
+   447→   447→   447→              whileInView={{ opacity: 1, y: 0 }}
+   448→   448→   448→              viewport={{ once: true, margin: '-80px' }}
+   449→   449→   449→              transition={{ duration: 0.6 }}
+   450→   450→   450→              className="text-center mb-14 md:mb-20"
+   451→   451→   451→            >
+   452→   452→   452→              <p className="text-terracotta font-heading text-xs tracking-[0.2em] uppercase mb-3">
+   453→   453→   453→                Les avantages
+   454→   454→   454→              </p>
+   455→   455→   455→              <h2 className="font-heading text-3xl md:text-4xl lg:text-[2.75rem] text-earth leading-tight">
+   456→   456→   456→                Pourquoi construire
+   457→   457→   457→                <br className="hidden sm:block" />
+   458→   458→   458→                {' '}en terre cuite ?
+   459→   459→   459→              </h2>
+   460→   460→   460→              <p className="text-warm-gray text-base md:text-lg mt-4 max-w-lg mx-auto">
+   461→   461→   461→                Un matériau qui transforme votre habitat
+   462→   462→   462→              </p>
+   463→   463→   463→            </motion.div>
+   464→   464→   464→
+   465→   465→   465→            <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6" stagger={0.07}>
+   466→   466→   466→              {AVANTAGES.map((item) => {
+   467→   467→   467→                const Icon = item.icon
+   468→   468→   468→                return (
+   469→   469→   469→                  <motion.div
+   470→   470→   470→                    key={item.title}
+   471→   471→   471→                    variants={fadeUp}
+   472→   472→   472→                    className="group bg-white rounded-2xl p-7 shadow-sm hover:shadow-md transition-all duration-300 border-t-[3px] border-terracotta/80 hover:border-terracotta"
+   473→   473→   473→                  >
+   474→   474→   474→                    <div className="w-13 h-13 rounded-xl bg-terracotta/[0.07] group-hover:bg-terracotta/[0.12] flex items-center justify-center mb-5 transition-colors duration-300">
+   475→   475→   475→                      <Icon className="h-6 w-6 text-terracotta" />
+   476→   476→   476→                    </div>
+   477→   477→   477→                    <h3 className="font-heading text-lg text-earth mb-2.5">
+   478→   478→   478→                      {item.title}
+   479→   479→   479→                    </h3>
+   480→   480→   480→                    <p className="text-warm-gray text-sm leading-relaxed">
+   481→   481→   481→                      {item.desc}
+   482→   482→   482→                    </p>
+   483→   483→   483→                  </motion.div>
+   484→   484→   484→                )
+   485→   485→   485→              })}
+   486→   486→   486→            </StaggerContainer>
+   487→   487→   487→          </div>
+   488→   488→   488→        </section>
+   489→   489→   489→
+   490→   490→   490→        <hr className="earth-divider" />
+   491→   491→   491→
+   492→   492→   492→        {/* ─── 4. NOS SOLUTIONS ─── */}
+   493→   493→   493→        <section id="solutions" className="bg-cream py-24 md:py-32">
+   494→   494→   494→          <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
+   495→   495→   495→            <motion.div
+   496→   496→   496→              initial={{ opacity: 0, y: 24 }}
+   497→   497→   497→              whileInView={{ opacity: 1, y: 0 }}
+   498→   498→   498→              viewport={{ once: true, margin: '-80px' }}
+   499→   499→   499→              transition={{ duration: 0.6 }}
+   500→   500→   500→              className="text-center mb-14 md:mb-20"
+   501→   501→   501→            >
+   502→   502→   502→              <p className="text-terracotta font-heading text-xs tracking-[0.2em] uppercase mb-3">
+   503→   503→   503→                Produits
+   504→   504→   504→              </p>
+   505→   505→   505→              <h2 className="font-heading text-3xl md:text-4xl lg:text-[2.75rem] text-earth leading-tight">
+   506→   506→   506→                Nos Solutions Constructives
+   507→   507→   507→              </h2>
+   508→   508→   508→              <p className="text-warm-gray text-base md:text-lg mt-4 max-w-lg mx-auto">
+   509→   509→   509→                Des briques pour chaque besoin de votre chantier
+   510→   510→   510→              </p>
+   511→   511→   511→            </motion.div>
+   512→   512→   512→
+   513→   513→   513→            <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-6" stagger={0.08}>
+   514→   514→   514→              {SOLUTIONS.map((item) => (
+   515→   515→   515→                <motion.div
+   516→   516→   516→                  key={item.title}
+   517→   517→   517→                  variants={fadeUp}
+   518→   518→   518→                  className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-500"
+   519→   519→   519→                >
+   520→   520→   520→                  <div className="relative aspect-[4/3] overflow-hidden">
+   521→   521→   521→                    <img
+   522→   522→   522→                      src={item.img}
+   523→   523→   523→                      alt={item.alt}
+   524→   524→   524→                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+   525→   525→   525→                      loading="lazy"
+   526→   526→   526→                    />
+   527→   527→   527→                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+   528→   528→   528→                    <span className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-earth text-[10px] font-medium tracking-wider uppercase px-2.5 py-1 rounded-full">
+   529→   529→   529→                      {item.tag}
+   530→   530→   530→                    </span>
+   531→   531→   531→                  </div>
+   532→   532→   532→                  <div className="p-5 pt-4">
+   533→   533→   533→                    <h3 className="font-heading text-[1.05rem] text-earth mb-2">
+   534→   534→   534→                      {item.title}
+   535→   535→   535→                    </h3>
+   536→   536→   536→                    <p className="text-warm-gray text-sm leading-relaxed mb-4">
+   537→   537→   537→                      {item.desc}
+   538→   538→   538→                    </p>
+   539→   539→   539→                    <a
+   540→   540→   540→                      href="#solutions"
+   541→   541→   541→                      className="group/link inline-flex items-center text-terracotta text-sm font-medium hover:text-terracotta-dark transition-colors"
+   542→   542→   542→                    >
+   543→   543→   543→                      En savoir plus
+   544→   544→   544→                      <ChevronRight className="ml-1 h-3.5 w-3.5 transition-transform group-hover/link:translate-x-0.5" />
+   545→   545→   545→                    </a>
+   546→   546→   546→                  </div>
+   547→   547→   547→                </motion.div>
+   548→   548→   548→              ))}
+   549→   549→   549→            </StaggerContainer>
+   550→   550→   550→
+   551→   551→   551→            <motion.div
+   552→   552→   552→              initial={{ opacity: 0, y: 16 }}
+   553→   553→   553→              whileInView={{ opacity: 1, y: 0 }}
+   554→   554→   554→              viewport={{ once: true }}
+   555→   555→   555→              transition={{ duration: 0.5, delay: 0.3 }}
+   556→   556→   556→              className="text-center mt-12 md:mt-16"
+   557→   557→   557→            >
+   558→   558→   558→              <a
+   559→   559→   559→                href="#solutions"
+
+[showing lines 60-559 of 954; use offset=560 with limit to continue reading]
