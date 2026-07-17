@@ -102,26 +102,26 @@ const SOLUTIONS = [
   {
     title: 'Briques Porteuses',
     desc: 'Briques structurelles haute résistance pour les murs porteurs de votre bâtiment.',
-    img: 'https://sfile.chatglm.cn/images-ppt/c12fbbe6e423.jpg',
+    img: '/images/nb-photos/nb-site-brick.jpg',
     alt: 'Briques porteuses en terre cuite Nature Brique',
   },
   {
     title: 'Briques de Parement',
     desc: 'Finitions décoratives qui donnent caractère et élégance à vos façades.',
-    img: 'https://sfile.chatglm.cn/images-ppt/1d19b42ca88b.jpg',
-    alt: 'Briques de parement décoratives en terre cuite',
+    img: '/images/nb-photos/nb-photo-2.jpg',
+    alt: 'Briques de parement décoratives en terre cuite Nature Brique',
   },
   {
     title: 'Pavés & Dalles',
     desc: 'Aménagements extérieurs durables qui allient esthétique et robustesse.',
-    img: 'https://sfile.chatglm.cn/images-ppt/acc3564a28d5.jpg',
-    alt: 'Pavés et dalles en terre cuite pour aménagement extérieur',
+    img: '/images/nb-photos/nb-photo-3.jpg',
+    alt: 'Pavés et dalles en terre cuite Nature Brique',
   },
   {
     title: 'Hourdis & Accessoires',
     desc: 'Solutions complètes pour votre chantier : hourdis, linteaux, claustras.',
-    img: 'https://sfile.chatglm.cn/images-ppt/cdb6770829c1.jpg',
-    alt: 'Hourdis et accessoires en terre cuite',
+    img: '/images/nb-photos/nb-photo-4.jpg',
+    alt: 'Hourdis et accessoires en terre cuite Nature Brique',
   },
 ]
 
@@ -130,20 +130,20 @@ const TRAVAUX = [
   {
     title: 'Villa Résidentielle à Cotonou',
     desc: "Une villa moderne où la brique en terre cuite crée une ambiance fraîche et contemporaine. Confort thermique optimal sans climatisation excessive.",
-    img: 'https://sfile.chatglm.cn/images-ppt/996e4d038810.jpg',
-    alt: 'Villa résidentielle construite en briques terre cuite à Cotonou',
+    img: '/images/nb-photos/nb-photo-7.jpg',
+    alt: 'Villa résidentielle construite en briques terre cuite Nature Brique',
   },
   {
     title: 'Bâtiment Public à Zogbodomey',
     desc: "Un édifice public construit entièrement en briques Nature Brique, démontrant la fiabilité de nos produits pour les projets institutionnels.",
-    img: 'https://sfile.chatglm.cn/images-ppt/a0fd4170d85d.jpg',
-    alt: 'Bâtiment public en terre cuite à Zogbodomey',
+    img: '/images/nb-photos/nb-site-fabpmt.jpeg',
+    alt: 'Bâtiment public en terre cuite à Zogbodomey - Nature Brique',
   },
   {
     title: 'Complexe Scolaire',
     desc: "Des salles de classe fraîches et saines grâce à la terre cuite, offrant un environnement d'apprentissage optimal pour les élèves.",
-    img: 'https://sfile.chatglm.cn/images-ppt/c084aece8f33.jpeg',
-    alt: 'Complexe scolaire construit en briques terre cuite',
+    img: '/images/nb-photos/nb-photo-1.jpg',
+    alt: 'Complexe scolaire construit en briques terre cuite Nature Brique',
   },
 ]
 
@@ -320,7 +320,7 @@ export default function Home() {
           {/* Background image */}
           <div className="absolute inset-0">
             <img
-              src="https://sfile.chatglm.cn/images-ppt/71994ed677c7.jpg"
+              src="/images/nb-photos/nb-photo-7.jpg"
               alt="Bâtiment moderne construit en briques terre cuite"
               className="w-full h-full object-cover"
               loading="eager"
@@ -675,7 +675,7 @@ export default function Home() {
           {/* Background image */}
           <div className="absolute inset-0">
             <img
-              src="https://sfile.chatglm.cn/images-ppt/a0bd1d6bfa72.jpg"
+              src="/images/nb-photos/nb-site-fabpmt.jpeg"
               alt="Construction en terre cuite au Bénin"
               className="w-full h-full object-cover"
               loading="lazy"
