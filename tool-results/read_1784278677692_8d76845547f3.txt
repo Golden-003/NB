@@ -1,0 +1,889 @@
+     1→'use client'
+     2→
+     3→import { useState, useEffect, useRef, useCallback } from 'react'
+     4→import Image from 'next/image'
+     5→import { motion, useInView, AnimatePresence } from 'framer-motion'
+     6→import {
+     7→  Thermometer,
+     8→  Volume2,
+     9→  Flame,
+    10→  Zap,
+    11→  Shield,
+    12→  Leaf,
+    13→  Phone,
+    14→  Mail,
+    15→  MapPin,
+    16→  Clock,
+    17→  ChevronRight,
+    18→  Menu,
+    19→  X,
+    20→  ArrowDown,
+    21→  CheckCircle,
+    22→  Compass,
+    23→  GraduationCap,
+    24→  HardHat,
+    25→  Facebook,
+    26→  Instagram,
+    27→} from 'lucide-react'
+    28→
+    29→/* ─── Animated Section Wrapper ─── */
+    30→function RevealSection({
+    31→  children,
+    32→  className = '',
+    33→  delay = 0,
+    34→}: {
+    35→  children: React.ReactNode
+    36→  className?: string
+    37→  delay?: number
+    38→}) {
+    39→  const ref = useRef<HTMLElement>(null)
+    40→  const isInView = useInView(ref, { once: true, margin: '-60px' })
+    41→
+    42→  return (
+    43→    <motion.section
+    44→      ref={ref}
+    45→      initial={{ opacity: 0, y: 40 }}
+    46→      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
+    47→      transition={{ duration: 0.7, ease: 'easeOut', delay }}
+    48→      className={className}
+    49→    >
+    50→      {children}
+    51→    </motion.section>
+    52→  )
+    53→}
+    54→
+    55→/* ─── NAV LINKS ─── */
+    56→const NAV_LINKS = [
+    57→  { label: 'Accueil', href: '#accueil' },
+    58→  { label: 'Construire en Terre Cuite', href: '#avantages' },
+    59→  { label: 'Nos Solutions', href: '#solutions' },
+    60→  { label: 'Nos Travaux', href: '#travaux' },
+    61→  { label: 'Services', href: '#services' },
+    62→  { label: 'À propos', href: '#apropos' },
+    63→  { label: 'Contact', href: '#contact' },
+    64→]
+    65→
+    66→/* ─── AVANTAGES DATA ─── */
+    67→const AVANTAGES = [
+    68→  {
+    69→    icon: Thermometer,
+    70→    title: 'Confort Thermique',
+    71→    desc: "La terre cuite régule naturellement la température intérieure, gardant votre maison fraîche en saison chaude et douce en saison fraîche. Jusqu'à 8°C de différence avec le béton.",
+    72→  },
+    73→  {
+    74→    icon: Volume2,
+    75→    title: 'Isolation Acoustique',
+    76→    desc: "Grâce à sa structure poreuse, la brique en terre cuite absorbe les bruits et offre un isolement phonique supérieur pour un cadre de vie paisible.",
+    77→  },
+    78→  {
+    79→    icon: Flame,
+    80→    title: 'Résistance au Feu',
+    81→    desc: "Incombustible par nature, la terre cuite résiste aux températures élevées et protège votre famille et vos biens.",
+    82→  },
+    83→  {
+    84→    icon: Zap,
+    85→    title: 'Performance Énergétique',
+    86→    desc: "Moins de climatisation, moins de chauffage. Les bâtiments en terre cuite consomment jusqu'à 30% d'énergie en moins.",
+    87→  },
+    88→  {
+    89→    icon: Shield,
+    90→    title: 'Durabilité Exceptionnelle',
+    91→    desc: "Les constructions en terre cuite traversent les décennies sans perdre ni leur solidité ni leur beauté.",
+    92→  },
+    93→  {
+    94→    icon: Leaf,
+    95→    title: 'Respect de l\'Environnement',
+    96→    desc: "Matériau 100% naturel, recyclable et local. Un bilan carbone largement inférieur au béton.",
+    97→  },
+    98→]
+    99→
+   100→/* ─── SOLUTIONS DATA ─── */
+   101→const SOLUTIONS = [
+   102→  {
+   103→    title: 'Briques Porteuses',
+   104→    desc: 'Briques structurelles haute résistance pour les murs porteurs de votre bâtiment.',
+   105→    img: 'https://sfile.chatglm.cn/images-ppt/c12fbbe6e423.jpg',
+   106→    alt: 'Briques porteuses en terre cuite Nature Brique',
+   107→  },
+   108→  {
+   109→    title: 'Briques de Parement',
+   110→    desc: 'Finitions décoratives qui donnent caractère et élégance à vos façades.',
+   111→    img: 'https://sfile.chatglm.cn/images-ppt/1d19b42ca88b.jpg',
+   112→    alt: 'Briques de parement décoratives en terre cuite',
+   113→  },
+   114→  {
+   115→    title: 'Pavés & Dalles',
+   116→    desc: 'Aménagements extérieurs durables qui allient esthétique et robustesse.',
+   117→    img: 'https://sfile.chatglm.cn/images-ppt/acc3564a28d5.jpg',
+   118→    alt: 'Pavés et dalles en terre cuite pour aménagement extérieur',
+   119→  },
+   120→  {
+   121→    title: 'Hourdis & Accessoires',
+   122→    desc: 'Solutions complètes pour votre chantier : hourdis, linteaux, claustras.',
+   123→    img: 'https://sfile.chatglm.cn/images-ppt/cdb6770829c1.jpg',
+   124→    alt: 'Hourdis et accessoires en terre cuite',
+   125→  },
+   126→]
+   127→
+   128→/* ─── TRAVAUX DATA ─── */
+   129→const TRAVAUX = [
+   130→  {
+   131→    title: 'Villa Résidentielle à Cotonou',
+   132→    desc: "Une villa moderne où la brique en terre cuite crée une ambiance fraîche et contemporaine. Confort thermique optimal sans climatisation excessive.",
+   133→    img: 'https://sfile.chatglm.cn/images-ppt/996e4d038810.jpg',
+   134→    alt: 'Villa résidentielle construite en briques terre cuite à Cotonou',
+   135→  },
+   136→  {
+   137→    title: 'Bâtiment Public à Zogbodomey',
+   138→    desc: "Un édifice public construit entièrement en briques Nature Brique, démontrant la fiabilité de nos produits pour les projets institutionnels.",
+   139→    img: 'https://sfile.chatglm.cn/images-ppt/a0fd4170d85d.jpg',
+   140→    alt: 'Bâtiment public en terre cuite à Zogbodomey',
+   141→  },
+   142→  {
+   143→    title: 'Complexe Scolaire',
+   144→    desc: "Des salles de classe fraîches et saines grâce à la terre cuite, offrant un environnement d'apprentissage optimal pour les élèves.",
+   145→    img: 'https://sfile.chatglm.cn/images-ppt/c084aece8f33.jpeg',
+   146→    alt: 'Complexe scolaire construit en briques terre cuite',
+   147→  },
+   148→]
+   149→
+   150→/* ─── SERVICES DATA ─── */
+   151→const SERVICES = [
+   152→  {
+   153→    icon: Compass,
+   154→    title: 'Études Techniques',
+   155→    desc: "Notre équipe d'ingénieurs vous accompagne dans la conception de votre projet avec des solutions optimisées en terre cuite.",
+   156→  },
+   157→  {
+   158→    icon: HardHat,
+   159→    title: 'Eco-Build',
+   160→    desc: "Notre partenaire Eco-Build vous propose une approche globale de la construction écologique, de l'architecture aux finitions.",
+   161→  },
+   162→  {
+   163→    icon: GraduationCap,
+   164→    title: 'Formation',
+   165→    desc: "Des sessions de formation pour vos équipes de maçons et entrepreneurs sur les techniques de pose de la brique en terre cuite.",
+   166→  },
+   167→  {
+   168→    icon: CheckCircle,
+   169→    title: 'Assistance Chantier',
+   170→    desc: "Un suivi technique sur vos chantiers pour garantir la qualité de la mise en oeuvre et le respect des normes.",
+   171→  },
+   172→]
+   173→
+   174→/* ═══════════════════════════════════════════════════════════════
+   175→   MAIN PAGE COMPONENT
+   176→   ═══════════════════════════════════════════════════════════════ */
+   177→export default function Home() {
+   178→  const [scrolled, setScrolled] = useState(false)
+   179→  const [mobileOpen, setMobileOpen] = useState(false)
+   180→
+   181→  const handleScroll = useCallback(() => {
+   182→    setScrolled(window.scrollY > 60)
+   183→  }, [])
+   184→
+   185→  useEffect(() => {
+   186→    window.addEventListener('scroll', handleScroll, { passive: true })
+   187→    return () => window.removeEventListener('scroll', handleScroll)
+   188→  }, [handleScroll])
+   189→
+   190→  // Close mobile menu on resize
+   191→  useEffect(() => {
+   192→    const onResize = () => {
+   193→      if (window.innerWidth >= 1024) setMobileOpen(false)
+   194→    }
+   195→    window.addEventListener('resize', onResize)
+   196→    return () => window.removeEventListener('resize', onResize)
+   197→  }, [])
+   198→
+   199→  // Lock body scroll when mobile menu is open
+   200→  useEffect(() => {
+   201→    if (mobileOpen) {
+   202→      document.body.style.overflow = 'hidden'
+   203→    } else {
+   204→      document.body.style.overflow = ''
+   205→    }
+   206→    return () => {
+   207→      document.body.style.overflow = ''
+   208→    }
+   209→  }, [mobileOpen])
+   210→
+   211→  const navItem = (label: string, href: string) => (
+   212→    <a
+   213→      key={href}
+   214→      href={href}
+   215→      onClick={() => setMobileOpen(false)}
+   216→      className={`text-sm font-medium transition-colors hover:text-terracotta ${
+   217→        scrolled
+   218→          ? 'text-earth hover:text-terracotta'
+   219→          : 'text-white/90 hover:text-white'
+   220→      }`}
+   221→    >
+   222→      {label}
+   223→    </a>
+   224→  )
+   225→
+   226→  return (
+   227→    <div className="min-h-screen flex flex-col bg-cream font-sans text-earth">
+   228→      {/* ─── 1. HEADER / NAVIGATION ─── */}
+   229→      <header
+   230→        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+   231→          scrolled
+   232→            ? 'bg-white/95 backdrop-blur-md shadow-sm'
+   233→            : 'bg-transparent'
+   234→        }`}
+   235→      >
+   236→        <div className="mx-auto max-w-7xl flex items-center justify-between px-4 sm:px-6 lg:px-8 h-16 md:h-20">
+   237→          {/* Logo */}
+   238→          <a href="#accueil" className="relative shrink-0">
+   239→            <Image
+   240→              src={scrolled ? '/images/logo.png' : '/images/logo-white.png'}
+   241→              alt="Nature Brique - Logo"
+   242→              width={140}
+   243→              height={60}
+   244→              priority
+   245→              className="h-10 w-auto md:h-12 lg:w-[140px] lg:h-[60px] object-contain"
+   246→            />
+   247→          </a>
+   248→
+   249→          {/* Desktop nav */}
+   250→          <nav className="hidden lg:flex items-center gap-6 xl:gap-7">
+   251→            {NAV_LINKS.map((l) => navItem(l.label, l.href))}
+   252→          </nav>
+   253→
+   254→          {/* Desktop CTA */}
+   255→          <a
+   256→            href="#contact"
+   257→            className="hidden lg:inline-flex items-center rounded-full bg-terracotta px-6 py-2.5 text-sm font-medium text-white font-heading transition-all hover:bg-terracotta-dark hover:scale-105"
+   258→          >
+   259→            Demander un devis
+   260→          </a>
+   261→
+   262→          {/* Mobile hamburger */}
+   263→          <button
+   264→            onClick={() => setMobileOpen(!mobileOpen)}
+   265→            className="lg:hidden p-2 rounded-md"
+   266→            aria-label={mobileOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
+   267→          >
+   268→            {mobileOpen ? (
+   269→              <X
+   270→                className={`h-6 w-6 ${scrolled ? 'text-earth' : 'text-white'}`}
+   271→              />
+   272→            ) : (
+   273→              <Menu
+   274→                className={`h-6 w-6 ${scrolled ? 'text-earth' : 'text-white'}`}
+   275→              />
+   276→            )}
+   277→          </button>
+   278→        </div>
+   279→
+   280→        {/* Mobile menu */}
+   281→        <AnimatePresence>
+   282→          {mobileOpen && (
+   283→            <motion.div
+   284→              initial={{ opacity: 0, height: 0 }}
+   285→              animate={{ opacity: 1, height: 'auto' }}
+   286→              exit={{ opacity: 0, height: 0 }}
+   287→              transition={{ duration: 0.3 }}
+   288→              className="lg:hidden bg-white border-t border-cream-dark overflow-hidden"
+   289→            >
+   290→              <nav className="flex flex-col gap-1 px-6 py-4">
+   291→                {NAV_LINKS.map((l) => (
+   292→                  <a
+   293→                    key={l.href}
+   294→                    href={l.href}
+   295→                    onClick={() => setMobileOpen(false)}
+   296→                    className="py-3 text-sm font-medium text-earth hover:text-terracotta transition-colors border-b border-cream-dark/50 last:border-0"
+   297→                  >
+   298→                    {l.label}
+   299→                  </a>
+   300→                ))}
+   301→                <a
+   302→                  href="#contact"
+   303→                  onClick={() => setMobileOpen(false)}
+   304→                  className="mt-3 inline-flex items-center justify-center rounded-full bg-terracotta px-6 py-3 text-sm font-medium text-white font-heading transition-all hover:bg-terracotta-dark"
+   305→                >
+   306→                  Demander un devis
+   307→                </a>
+   308→              </nav>
+   309→            </motion.div>
+   310→          )}
+   311→        </AnimatePresence>
+   312→      </header>
+   313→
+   314→      <main className="flex-1">
+   315→        {/* ─── 2. HERO SECTION ─── */}
+   316→        <section
+   317→          id="accueil"
+   318→          className="relative min-h-screen flex items-center overflow-hidden"
+   319→        >
+   320→          {/* Background image */}
+   321→          <div className="absolute inset-0">
+   322→            <img
+   323→              src="https://sfile.chatglm.cn/images-ppt/71994ed677c7.jpg"
+   324→              alt="Bâtiment moderne construit en briques terre cuite"
+   325→              className="w-full h-full object-cover"
+   326→              loading="eager"
+   327→            />
+   328→            <div className="hero-overlay absolute inset-0" />
+   329→          </div>
+   330→
+   331→          {/* Content */}
+   332→          <div className="relative z-10 mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8 py-32 md:py-40">
+   333→            <div className="max-w-2xl">
+   334→              <motion.p
+   335→                initial={{ opacity: 0, y: 20 }}
+   336→                animate={{ opacity: 1, y: 0 }}
+   337→                transition={{ duration: 0.6, delay: 0.2 }}
+   338→                className="text-mint font-heading text-sm md:text-base tracking-widest uppercase mb-4"
+   339→              >
+   340→                Construisons notre monde écologique
+   341→              </motion.p>
+   342→
+   343→              <motion.h1
+   344→                initial={{ opacity: 0, y: 30 }}
+   345→                animate={{ opacity: 1, y: 0 }}
+   346→                transition={{ duration: 0.7, delay: 0.4 }}
+   347→                className="font-heading text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-white leading-tight mb-6"
+   348→              >
+   349→                La terre cuite,{' '}
+   350→                <span className="text-terracotta-light">un art de construire</span>
+   351→              </motion.h1>
+   352→
+   353→              <motion.p
+   354→                initial={{ opacity: 0, y: 20 }}
+   355→                animate={{ opacity: 1, y: 0 }}
+   356→                transition={{ duration: 0.6, delay: 0.6 }}
+   357→                className="text-white/85 text-base md:text-lg lg:text-xl leading-relaxed mb-8 max-w-xl"
+   358→              >
+   359→                Depuis 2011, Nature Brique fabrique au Bénin des briques en terre
+   360→                cuite qui allient confort thermique, durabilité et esthétique.
+   361→                Construisons ensemble un avenir plus sain.
+   362→              </motion.p>
+   363→
+   364→              <motion.div
+   365→                initial={{ opacity: 0, y: 20 }}
+   366→                animate={{ opacity: 1, y: 0 }}
+   367→                transition={{ duration: 0.6, delay: 0.8 }}
+   368→                className="flex flex-wrap gap-4"
+   369→              >
+   370→                <a
+   371→                  href="#solutions"
+   372→                  className="inline-flex items-center rounded-full bg-terracotta px-8 py-3 text-white font-heading text-sm md:text-base transition-all hover:bg-terracotta-dark hover:scale-105"
+   373→                >
+   374→                  Découvrir nos solutions
+   375→                  <ChevronRight className="ml-2 h-4 w-4" />
+   376→                </a>
+   377→                <a
+   378→                  href="#contact"
+   379→                  className="inline-flex items-center rounded-full border-2 border-white/60 px-8 py-3 text-white font-heading text-sm md:text-base transition-all hover:bg-white/10 hover:border-white hover:scale-105"
+   380→                >
+   381→                  Demander un devis
+   382→                </a>
+   383→              </motion.div>
+   384→            </div>
+   385→          </div>
+   386→
+   387→          {/* Scroll indicator */}
+   388→          <motion.div
+   389→            initial={{ opacity: 0 }}
+   390→            animate={{ opacity: 1 }}
+   391→            transition={{ delay: 1.2, duration: 0.8 }}
+   392→            className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10"
+   393→          >
+   394→            <a
+   395→              href="#avantages"
+   396→              className="flex flex-col items-center gap-2 text-white/60 hover:text-white/90 transition-colors"
+   397→              aria-label="Défiler vers le bas"
+   398→            >
+   399→              <span className="text-xs tracking-widest uppercase">Découvrir</span>
+   400→              <motion.div
+   401→                animate={{ y: [0, 8, 0] }}
+   402→                transition={{ repeat: Infinity, duration: 1.8, ease: 'easeInOut' }}
+   403→              >
+   404→                <ArrowDown className="h-5 w-5" />
+   405→              </motion.div>
+   406→            </a>
+   407→          </motion.div>
+   408→        </section>
+   409→
+   410→        {/* ─── 3. AVANTAGES ─── */}
+   411→        <RevealSection id="avantages" className="bg-cream-dark py-20 md:py-28">
+   412→          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+   413→            <div className="text-center mb-12 md:mb-16">
+   414→              <h2 className="font-heading text-3xl md:text-4xl lg:text-5xl text-earth mb-4">
+   415→                Pourquoi construire en terre cuite ?
+   416→              </h2>
+   417→              <p className="text-warm-gray text-lg md:text-xl max-w-2xl mx-auto">
+   418→                Un matériau qui transforme votre habitat
+   419→              </p>
+   420→            </div>
+   421→
+   422→            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+   423→              {AVANTAGES.map((item, i) => {
+   424→                const Icon = item.icon
+   425→                return (
+   426→                  <motion.div
+   427→                    key={item.title}
+   428→                    initial={{ opacity: 0, y: 30 }}
+   429→                    whileInView={{ opacity: 1, y: 0 }}
+   430→                    viewport={{ once: true, margin: '-40px' }}
+   431→                    transition={{ duration: 0.5, delay: i * 0.1 }}
+   432→                    className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border-t-4 border-terracotta"
+   433→                  >
+   434→                    <div className="w-14 h-14 rounded-full bg-terracotta/10 flex items-center justify-center mb-5">
+   435→                      <Icon className="h-7 w-7 text-terracotta" />
+   436→                    </div>
+   437→                    <h3 className="font-heading text-xl text-earth mb-3">
+   438→                      {item.title}
+   439→                    </h3>
+   440→                    <p className="text-warm-gray text-sm leading-relaxed">
+   441→                      {item.desc}
+   442→                    </p>
+   443→                  </motion.div>
+   444→                )
+   445→              })}
+   446→            </div>
+   447→          </div>
+   448→        </RevealSection>
+   449→
+   450→        <hr className="earth-divider" />
+   451→
+   452→        {/* ─── 4. NOS SOLUTIONS ─── */}
+   453→        <RevealSection id="solutions" className="bg-cream py-20 md:py-28">
+   454→          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+   455→            <div className="text-center mb-12 md:mb-16">
+   456→              <h2 className="font-heading text-3xl md:text-4xl lg:text-5xl text-earth mb-4">
+   457→                Nos Solutions Constructives
+   458→              </h2>
+   459→              <p className="text-warm-gray text-lg md:text-xl max-w-2xl mx-auto">
+   460→                Des briques pour chaque besoin de votre chantier
+   461→              </p>
+   462→            </div>
+   463→
+   464→            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+   465→              {SOLUTIONS.map((item, i) => (
+   466→                <motion.div
+   467→                  key={item.title}
+   468→                  initial={{ opacity: 0, y: 30 }}
+   469→                  whileInView={{ opacity: 1, y: 0 }}
+   470→                  viewport={{ once: true, margin: '-40px' }}
+   471→                  transition={{ duration: 0.5, delay: i * 0.1 }}
+   472→                  className="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+   473→                >
+   474→                  <div className="relative aspect-[4/3] overflow-hidden">
+   475→                    <img
+   476→                      src={item.img}
+   477→                      alt={item.alt}
+   478→                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+   479→                      loading="lazy"
+   480→                    />
+   481→                  </div>
+   482→                  <div className="p-5">
+   483→                    <h3 className="font-heading text-lg text-earth mb-2">
+   484→                      {item.title}
+   485→                    </h3>
+   486→                    <p className="text-warm-gray text-sm leading-relaxed mb-4">
+   487→                      {item.desc}
+   488→                    </p>
+   489→                    <a
+   490→                      href="#solutions"
+   491→                      className="inline-flex items-center text-terracotta text-sm font-medium hover:text-terracotta-dark transition-colors"
+   492→                    >
+   493→                      En savoir plus
+   494→                      <ChevronRight className="ml-1 h-4 w-4" />
+   495→                    </a>
+   496→                  </div>
+   497→                </motion.div>
+   498→              ))}
+   499→            </div>
+   500→
+   501→            <div className="text-center mt-10 md:mt-14">
+   502→              <a
+   503→                href="#solutions"
+   504→                className="inline-flex items-center rounded-full bg-terracotta px-8 py-3 text-white font-heading text-sm md:text-base transition-all hover:bg-terracotta-dark hover:scale-105"
+   505→              >
+   506→                Voir toutes nos solutions
+   507→                <ChevronRight className="ml-2 h-4 w-4" />
+   508→              </a>
+   509→            </div>
+   510→          </div>
+   511→        </RevealSection>
+   512→
+   513→        <hr className="earth-divider" />
+   514→
+   515→        {/* ─── 5. NOS TRAVAUX ─── */}
+   516→        <RevealSection id="travaux" className="bg-white py-20 md:py-28">
+   517→          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+   518→            <div className="text-center mb-12 md:mb-16">
+   519→              <h2 className="font-heading text-3xl md:text-4xl lg:text-5xl text-earth mb-4">
+   520→                Nos Réalisations
+   521→              </h2>
+   522→              <p className="text-warm-gray text-lg md:text-xl max-w-2xl mx-auto">
+   523→                Des projets qui prouvent notre savoir-faire
+   524→              </p>
+   525→            </div>
+   526→
+   527→            <div className="flex flex-col gap-10 md:gap-16">
+   528→              {TRAVAUX.map((item, i) => {
+   529→                const isEven = i % 2 === 0
+   530→                return (
+   531→                  <motion.div
+   532→                    key={item.title}
+   533→                    initial={{ opacity: 0, x: isEven ? -40 : 40 }}
+   534→                    whileInView={{ opacity: 1, x: 0 }}
+   535→                    viewport={{ once: true, margin: '-60px' }}
+   536→                    transition={{ duration: 0.7, ease: 'easeOut' }}
+   537→                    className={`flex flex-col ${
+   538→                      isEven ? 'lg:flex-row' : 'lg:flex-row-reverse'
+   539→                    } gap-6 md:gap-10 items-stretch`}
+   540→                  >
+   541→                    {/* Image */}
+   542→                    <div className="lg:w-1/2 relative rounded-2xl overflow-hidden aspect-[4/3] lg:aspect-auto lg:min-h-[360px]">
+   543→                      <img
+   544→                        src={item.img}
+   545→                        alt={item.alt}
+   546→                        className="w-full h-full object-cover"
+   547→                        loading="lazy"
+   548→                      />
+   549→                    </div>
+   550→                    {/* Text */}
+   551→                    <div className="lg:w-1/2 flex flex-col justify-center py-2">
+   552→                      <h3 className="font-heading text-2xl md:text-3xl text-earth mb-4">
+   553→                        {item.title}
+   554→                      </h3>
+   555→                      <p className="text-warm-gray text-base md:text-lg leading-relaxed mb-6">
+   556→                        {item.desc}
+   557→                      </p>
+   558→                      <a
+   559→                        href="#travaux"
+   560→                        className="inline-flex items-center text-terracotta font-medium hover:text-terracotta-dark transition-colors"
+   561→                      >
+   562→                        Voir le projet
+   563→                        <ChevronRight className="ml-2 h-5 w-5" />
+   564→                      </a>
+   565→                    </div>
+   566→                  </motion.div>
+   567→                )
+   568→              })}
+   569→            </div>
+   570→          </div>
+   571→        </RevealSection>
+   572→
+   573→        <hr className="earth-divider" />
+   574→
+   575→        {/* ─── 6. SERVICES ─── */}
+   576→        <RevealSection id="services" className="bg-cream py-20 md:py-28">
+   577→          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+   578→            <div className="text-center mb-12 md:mb-16">
+   579→              <h2 className="font-heading text-3xl md:text-4xl lg:text-5xl text-earth mb-4">
+   580→                Nos Services
+   581→              </h2>
+   582→              <p className="text-warm-gray text-lg md:text-xl max-w-2xl mx-auto">
+   583→                Un accompagnement complet de la conception à la réalisation
+   584→              </p>
+   585→            </div>
+   586→
+   587→            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+   588→              {SERVICES.map((item, i) => {
+   589→                const Icon = item.icon
+   590→                return (
+   591→                  <motion.div
+   592→                    key={item.title}
+   593→                    initial={{ opacity: 0, y: 30 }}
+   594→                    whileInView={{ opacity: 1, y: 0 }}
+   595→                    viewport={{ once: true, margin: '-40px' }}
+   596→                    transition={{ duration: 0.5, delay: i * 0.1 }}
+   597→                    className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border-l-4 border-mint"
+   598→                  >
+   599→                    <div className="w-14 h-14 rounded-full bg-mint/20 flex items-center justify-center mb-5">
+   600→                      <Icon className="h-7 w-7 text-mint-dark" />
+   601→                    </div>
+   602→                    <h3 className="font-heading text-xl text-earth mb-3">
+   603→                      {item.title}
+   604→                    </h3>
+   605→                    <p className="text-warm-gray text-sm leading-relaxed">
+   606→                      {item.desc}
+   607→                    </p>
+   608→                  </motion.div>
+   609→                )
+   610→              })}
+   611→            </div>
+   612→          </div>
+   613→        </RevealSection>
+   614→
+   615→        <hr className="earth-divider" />
+   616→
+   617→        {/* ─── 7. POURQUOI NOUS CHOISIR ─── */}
+   618→        <section className="bg-terracotta py-20 md:py-28">
+   619→          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+   620→            <motion.h2
+   621→              initial={{ opacity: 0, y: 30 }}
+   622→              whileInView={{ opacity: 1, y: 0 }}
+   623→              viewport={{ once: true }}
+   624→              transition={{ duration: 0.6 }}
+   625→              className="font-heading text-3xl md:text-4xl lg:text-5xl text-white text-center mb-12 md:mb-16"
+   626→            >
+   627→              Nature Brique, c&apos;est plus qu&apos;un fabricant
+   628→            </motion.h2>
+   629→
+   630→            {/* Key facts */}
+   631→            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 mb-12 md:mb-16">
+   632→              {[
+   633→                { num: '2011', label: 'Année de création' },
+   634→                { num: '30+', label: 'Employés engagés' },
+   635→                { num: '1ère', label: 'Industrie céramique du Bénin' },
+   636→                { num: '100%', label: 'Terre cuite naturelle' },
+   637→              ].map((fact, i) => (
+   638→                <motion.div
+   639→                  key={fact.label}
+   640→                  initial={{ opacity: 0, scale: 0.9 }}
+   641→                  whileInView={{ opacity: 1, scale: 1 }}
+   642→                  viewport={{ once: true }}
+   643→                  transition={{ duration: 0.5, delay: i * 0.12 }}
+   644→                  className="text-center"
+   645→                >
+   646→                  <div className="font-heading text-4xl md:text-5xl lg:text-6xl text-white mb-2">
+   647→                    {fact.num}
+   648→                  </div>
+   649→                  <p className="text-white/80 text-sm md:text-base">
+   650→                    {fact.label}
+   651→                  </p>
+   652→                </motion.div>
+   653→              ))}
+   654→            </div>
+   655→
+   656→            {/* Founder paragraph */}
+   657→            <motion.p
+   658→              initial={{ opacity: 0, y: 20 }}
+   659→              whileInView={{ opacity: 1, y: 0 }}
+   660→              viewport={{ once: true }}
+   661→              transition={{ duration: 0.6, delay: 0.3 }}
+   662→              className="text-white/90 text-center text-base md:text-lg leading-relaxed max-w-3xl mx-auto"
+   663→            >
+   664→              Fondée par Franck Kidjo, ingénieur revenu de Belgique après 20
+   665→              ans d&apos;expérience, Nature Brique est née de la conviction
+   666→              qu&apos;il est possible de construire différemment au Bénin. Notre
+   667→              mission : offrir aux populations des matériaux sains, performants
+   668→              et respectueux de l&apos;environnement.
+   669→            </motion.p>
+   670→          </div>
+   671→        </section>
+   672→
+   673→        {/* ─── 8. CTA SECTION ─── */}
+   674→        <section id="contact" className="relative py-20 md:py-28 overflow-hidden">
+   675→          {/* Background image */}
+   676→          <div className="absolute inset-0">
+   677→            <img
+   678→              src="https://sfile.chatglm.cn/images-ppt/a0bd1d6bfa72.jpg"
+   679→              alt="Construction en terre cuite au Bénin"
+   680→              className="w-full h-full object-cover"
+   681→              loading="lazy"
+   682→            />
+   683→            <div className="absolute inset-0 bg-earth/85" />
+   684→          </div>
+   685→
+   686→          <div className="relative z-10 mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 text-center">
+   687→            <motion.h2
+   688→              initial={{ opacity: 0, y: 30 }}
+   689→              whileInView={{ opacity: 1, y: 0 }}
+   690→              viewport={{ once: true }}
+   691→              transition={{ duration: 0.6 }}
+   692→              className="font-heading text-3xl md:text-4xl lg:text-5xl text-white mb-4"
+   693→            >
+   694→              Prêt à construire avec la terre cuite ?
+   695→            </motion.h2>
+   696→
+   697→            <motion.p
+   698→              initial={{ opacity: 0, y: 20 }}
+   699→              whileInView={{ opacity: 1, y: 0 }}
+   700→              viewport={{ once: true }}
+   701→              transition={{ duration: 0.6, delay: 0.15 }}
+   702→              className="text-white/80 text-base md:text-lg leading-relaxed mb-8 md:mb-10"
+   703→            >
+   704→              Contactez-nous pour discuter de votre projet. Notre équipe vous
+   705→              accompagne du devis à la réalisation.
+   706→            </motion.p>
+   707→
+   708→            <motion.div
+   709→              initial={{ opacity: 0, y: 20 }}
+   710→              whileInView={{ opacity: 1, y: 0 }}
+   711→              viewport={{ once: true }}
+   712→              transition={{ duration: 0.6, delay: 0.3 }}
+   713→              className="flex flex-col sm:flex-row items-center justify-center gap-4 md:gap-6"
+   714→            >
+   715→              <a
+   716→                href="#contact"
+   717→                className="inline-flex items-center rounded-full bg-mint px-8 py-3 text-earth font-heading text-sm md:text-base transition-all hover:bg-mint-light hover:scale-105"
+   718→              >
+   719→                Demander un devis
+   720→              </a>
+   721→              <a
+   722→                href="tel:+22996505057"
+   723→                className="inline-flex items-center text-white/90 hover:text-white transition-colors text-sm md:text-base"
+   724→              >
+   725→                <Phone className="mr-2 h-4 w-4" />
+   726→                Appelez-nous : +229 96 50 50 57
+   727→              </a>
+   728→            </motion.div>
+   729→          </div>
+   730→        </section>
+   731→      </main>
+   732→
+   733→      {/* ─── 9. FOOTER ─── */}
+   734→      <footer className="bg-earth text-white/80">
+   735→        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 md:py-20">
+   736→          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 md:gap-12">
+   737→            {/* Column 1: Brand */}
+   738→            <div>
+   739→              <Image
+   740→                src="/images/logo-white.png"
+   741→                alt="Nature Brique - Logo"
+   742→                width={140}
+   743→                height={60}
+   744→                className="h-12 w-auto mb-5 object-contain"
+   745→              />
+   746→              <p className="text-white/70 text-sm leading-relaxed mb-6">
+   747→                Première industrie céramique du Bénin. Des briques en terre cuite
+   748→                pour une construction durable, confortable et respectueuse de
+   749→                l&apos;environnement.
+   750→              </p>
+   751→              <div className="flex items-center gap-4">
+   752→                <a
+   753→                  href="https://www.facebook.com/naturebrique.net"
+   754→                  target="_blank"
+   755→                  rel="noopener noreferrer"
+   756→                  className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-terracotta transition-colors"
+   757→                  aria-label="Facebook de Nature Brique"
+   758→                >
+   759→                  <Facebook className="h-5 w-5" />
+   760→                </a>
+   761→                <a
+   762→                  href="https://www.instagram.com/naturebrique"
+   763→                  target="_blank"
+   764→                  rel="noopener noreferrer"
+   765→                  className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-terracotta transition-colors"
+   766→                  aria-label="Instagram de Nature Brique"
+   767→                >
+   768→                  <Instagram className="h-5 w-5" />
+   769→                </a>
+   770→                <a
+   771→                  href="mailto:info@naturebrique.com"
+   772→                  className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-terracotta transition-colors"
+   773→                  aria-label="Envoyer un email à Nature Brique"
+   774→                >
+   775→                  <Mail className="h-5 w-5" />
+   776→                </a>
+   777→              </div>
+   778→            </div>
+   779→
+   780→            {/* Column 2: Navigation */}
+   781→            <div>
+   782→              <h4 className="font-heading text-white text-lg mb-5">
+   783→                Navigation
+   784→              </h4>
+   785→              <ul className="space-y-3">
+   786→                {NAV_LINKS.map((l) => (
+   787→                  <li key={l.href}>
+   788→                    <a
+   789→                      href={l.href}
+   790→                      className="text-sm text-white/70 hover:text-terracotta-light transition-colors"
+   791→                    >
+   792→                      {l.label}
+   793→                    </a>
+   794→                  </li>
+   795→                ))}
+   796→              </ul>
+   797→            </div>
+   798→
+   799→            {/* Column 3: Solutions */}
+   800→            <div>
+   801→              <h4 className="font-heading text-white text-lg mb-5">
+   802→                Nos Solutions
+   803→              </h4>
+   804→              <ul className="space-y-3">
+   805→                <li>
+   806→                  <a
+   807→                    href="#solutions"
+   808→                    className="text-sm text-white/70 hover:text-terracotta-light transition-colors"
+   809→                  >
+   810→                    Briques porteuses
+   811→                  </a>
+   812→                </li>
+   813→                <li>
+   814→                  <a
+   815→                    href="#solutions"
+   816→                    className="text-sm text-white/70 hover:text-terracotta-light transition-colors"
+   817→                  >
+   818→                    Briques de parement
+   819→                  </a>
+   820→                </li>
+   821→                <li>
+   822→                  <a
+   823→                    href="#solutions"
+   824→                    className="text-sm text-white/70 hover:text-terracotta-light transition-colors"
+   825→                  >
+   826→                    Pavés &amp; Dalles
+   827→                  </a>
+   828→                </li>
+   829→                <li>
+   830→                  <a
+   831→                    href="#solutions"
+   832→                    className="text-sm text-white/70 hover:text-terracotta-light transition-colors"
+   833→                  >
+   834→                    Hourdis &amp; Accessoires
+   835→                  </a>
+   836→                </li>
+   837→              </ul>
+   838→            </div>
+   839→
+   840→            {/* Column 4: Contact */}
+   841→            <div>
+   842→              <h4 className="font-heading text-white text-lg mb-5">Contact</h4>
+   843→              <ul className="space-y-4">
+   844→                <li className="flex items-start gap-3">
+   845→                  <MapPin className="h-5 w-5 text-terracotta-light shrink-0 mt-0.5" />
+   846→                  <span className="text-sm text-white/70">
+   847→                    Lot 3614, Fidjrosse-Houta, Cotonou, Bénin
+   848→                  </span>
+   849→                </li>
+   850→                <li className="flex items-center gap-3">
+   851→                  <Phone className="h-5 w-5 text-terracotta-light shrink-0" />
+   852→                  <a
+   853→                    href="tel:+22996505057"
+   854→                    className="text-sm text-white/70 hover:text-terracotta-light transition-colors"
+   855→                  >
+   856→                    +229 96 50 50 57
+   857→                  </a>
+   858→                </li>
+   859→                <li className="flex items-center gap-3">
+   860→                  <Mail className="h-5 w-5 text-terracotta-light shrink-0" />
+   861→                  <a
+   862→                    href="mailto:info@naturebrique.com"
+   863→                    className="text-sm text-white/70 hover:text-terracotta-light transition-colors"
+   864→                  >
+   865→                    info@naturebrique.com
+   866→                  </a>
+   867→                </li>
+   868→                <li className="flex items-center gap-3">
+   869→                  <Clock className="h-5 w-5 text-terracotta-light shrink-0" />
+   870→                  <span className="text-sm text-white/70">
+   871→                    Lun-Ven : 8h - 18h
+   872→                  </span>
+   873→                </li>
+   874→              </ul>
+   875→            </div>
+   876→          </div>
+   877→        </div>
+   878→
+   879→        {/* Bottom bar */}
+   880→        <div className="border-t border-white/10">
+   881→          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-white/50">
+   882→            <p>&copy; 2025 Nature Brique. Tous droits réservés.</p>
+   883→            <p>Cotonou, Bénin</p>
+   884→          </div>
+   885→        </div>
+   886→      </footer>
+   887→    </div>
+   888→  )
+   889→}
