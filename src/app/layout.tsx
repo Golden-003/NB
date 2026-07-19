@@ -1,6 +1,20 @@
 import type { Metadata } from "next";
+import { DM_Serif_Display, DM_Sans } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
+
+const dmSerifDisplay = DM_Serif_Display({
+  weight: "400",
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-heading",
+});
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-body",
+});
 
 export const metadata: Metadata = {
   title: "Nature Brique | Fabricant de Briques en Terre Cuite au Bénin",
@@ -83,7 +97,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // JSON-LD Structured Data - LocalBusiness (SEO Local)
   const localBusinessJsonLd = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
@@ -113,13 +126,7 @@ export default function RootLayout({
     openingHoursSpecification: [
       {
         "@type": "OpeningHoursSpecification",
-        dayOfWeek: [
-          "Monday",
-          "Tuesday",
-          "Wednesday",
-          "Thursday",
-          "Friday",
-        ],
+        dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
         opens: "08:00",
         closes: "18:00",
       },
@@ -131,10 +138,7 @@ export default function RootLayout({
     priceRange: "$$",
     currenciesAccepted: "XOF",
     paymentAccepted: "Cash, Bank Transfer",
-    areaServed: {
-      "@type": "Country",
-      name: "Bénin",
-    },
+    areaServed: { "@type": "Country", name: "Bénin" },
     knowsLanguage: ["fr", "fon", "yo"],
     foundingDate: "2011",
     founder: {
@@ -151,129 +155,56 @@ export default function RootLayout({
       "@type": "OfferCatalog",
       name: "Briques en terre cuite",
       itemListElement: [
-        {
-          "@type": "Offer",
-          itemOffered: {
-            "@type": "Product",
-            name: "Briques porteuses en terre cuite",
-            description:
-              "Briques structurelles en terre cuite pour la construction de murs porteurs.",
-          },
-        },
-        {
-          "@type": "Offer",
-          itemOffered: {
-            "@type": "Product",
-            name: "Briques de parement",
-            description:
-              "Briques de finition décorative pour les façades.",
-          },
-        },
-        {
-          "@type": "Offer",
-          itemOffered: {
-            "@type": "Product",
-            name: "Pavés en terre cuite",
-            description: "Pavés pour aménagement extérieur.",
-          },
-        },
+        { "@type": "Offer", itemOffered: { "@type": "Product", name: "Briques porteuses en terre cuite", description: "Briques structurelles en terre cuite pour la construction de murs porteurs." } },
+        { "@type": "Offer", itemOffered: { "@type": "Product", name: "Briques de parement", description: "Briques de finition décorative pour les façades." } },
+        { "@type": "Offer", itemOffered: { "@type": "Product", name: "Pavés en terre cuite", description: "Pavés pour aménagement extérieur." } },
       ],
     },
   };
 
-  // JSON-LD - Organization
   const organizationJsonLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: "Nature Brique",
     url: "https://naturebrique.com",
     logo: "https://naturebrique.com/images/logo.png",
-    contactPoint: {
-      "@type": "ContactPoint",
-      telephone: "+229-96-50-50-57",
-      contactType: "sales",
-      availableLanguage: ["fr"],
-      areaServed: "BJ",
-    },
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: "Lot 3614, Fidjrosse-Houta",
-      addressLocality: "Cotonou",
-      addressCountry: "BJ",
-    },
-    sameAs: [
-      "https://www.facebook.com/naturebrique.net",
-      "https://www.instagram.com/naturebrique",
-    ],
+    contactPoint: { "@type": "ContactPoint", telephone: "+229-96-50-50-57", contactType: "sales", availableLanguage: ["fr"], areaServed: "BJ" },
+    address: { "@type": "PostalAddress", streetAddress: "Lot 3614, Fidjrosse-Houta", addressLocality: "Cotonou", addressCountry: "BJ" },
+    sameAs: ["https://www.facebook.com/naturebrique.net", "https://www.instagram.com/naturebrique"],
   };
 
-  // JSON-LD - WebSite
   const websiteJsonLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: "Nature Brique",
     url: "https://naturebrique.com",
-    potentialAction: {
-      "@type": "SearchAction",
-      target: "https://naturebrique.com/?s={search_term_string}",
-      "query-input": "required name=search_term_string",
-    },
+    potentialAction: { "@type": "SearchAction", target: "https://naturebrique.com/?s={search_term_string}", "query-input": "required name=search_term_string" },
     inLanguage: "fr",
   };
 
-  // JSON-LD - Place (for local SEO)
   const placeJsonLd = {
     "@context": "https://schema.org",
     "@type": "Place",
     name: "Nature Brique - Usine de production",
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: "Zone de Tanwé Hessou",
-      addressLocality: "Zogbodomey",
-      addressRegion: "Zou",
-      addressCountry: "BJ",
-    },
-    geo: {
-      "@type": "GeoCoordinates",
-      latitude: "7.0333",
-      longitude: "2.3167",
-    },
+    address: { "@type": "PostalAddress", streetAddress: "Zone de Tanwé Hessou", addressLocality: "Zogbodomey", addressRegion: "Zou", addressCountry: "BJ" },
+    geo: { "@type": "GeoCoordinates", latitude: "7.0333", longitude: "2.3167" },
   };
 
   return (
-    <html lang="fr" suppressHydrationWarning>
+    <html lang="fr" suppressHydrationWarning className={`${dmSerifDisplay.variable} ${dmSans.variable}`}>
       <head>
         <meta name="geo.region" content="BJ-LI" />
         <meta name="geo.placename" content="Cotonou" />
         <meta name="geo.position" content="6.3654;2.4183" />
         <meta name="ICBM" content="6.3654, 2.4183" />
-        <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(localBusinessJsonLd),
-          }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(organizationJsonLd),
-          }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(websiteJsonLd),
-          }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(placeJsonLd),
-          }}
-        />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessJsonLd) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(placeJsonLd) }} />
       </head>
-      <body className="antialiased bg-background text-foreground">
+      <body className="antialiased bg-background text-foreground font-body">
         {children}
         <Toaster />
       </body>

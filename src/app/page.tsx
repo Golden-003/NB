@@ -34,15 +34,15 @@ import {
    ═══════════════════════════════════════════ */
 const ease = [0.22, 1, 0.36, 1] as const
 
-function FadeIn({ children, delay = 0, y = 30, className = '' }: { children: React.ReactNode; delay?: number; y?: number; className?: string }) {
+function FadeIn({ children, delay = 0, y = 20, className = '' }: { children: React.ReactNode; delay?: number; y?: number; className?: string }) {
   const ref = useRef<HTMLDivElement>(null)
-  const inView = useInView(ref, { once: true, margin: '-60px' })
+  const inView = useInView(ref, { once: true, margin: '-80px' })
   return (
     <motion.div
       ref={ref}
       initial={{ opacity: 0, y }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.7, delay, ease }}
+      transition={{ duration: 0.9, delay, ease: [0.25, 0.1, 0.25, 1] }}
       className={className}
     >
       {children}
@@ -50,9 +50,9 @@ function FadeIn({ children, delay = 0, y = 30, className = '' }: { children: Rea
   )
 }
 
-function StaggerGroup({ children, className = '', stagger = 0.1 }: { children: React.ReactNode; className?: string; stagger?: number }) {
+function StaggerGroup({ children, className = '', stagger = 0.08 }: { children: React.ReactNode; className?: string; stagger?: number }) {
   const ref = useRef<HTMLDivElement>(null)
-  const inView = useInView(ref, { once: true, margin: '-40px' })
+  const inView = useInView(ref, { once: true, margin: '-60px' })
   return (
     <motion.div
       ref={ref}
@@ -67,8 +67,8 @@ function StaggerGroup({ children, className = '', stagger = 0.1 }: { children: R
 }
 
 const staggerItem = {
-  hidden: { opacity: 0, y: 24 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease } },
+  hidden: { opacity: 0, y: 18 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.25, 0.1, 0.25, 1] } },
 }
 
 /* ═══════════════════════════════════════════
@@ -138,7 +138,7 @@ function Navigation() {
               <a
                 key={link.href}
                 href={link.href}
-                className={`px-4 py-2 text-sm font-bold tracking-wide rounded-full transition-all duration-300 ${
+                className={`px-4 py-2 text-sm font-semibold tracking-wide rounded-full transition-all duration-300 ${
                   scrolled
                     ? 'text-earth hover:text-terracotta hover:bg-terracotta/5'
                     : 'text-white/90 hover:text-white hover:bg-white/10'
@@ -152,7 +152,7 @@ function Navigation() {
           {/* CTA Desktop */}
           <a
             href="tel:+22996505057"
-            className="hidden lg:flex items-center gap-2 btn-premium bg-terracotta text-white px-5 py-2.5 rounded-full text-sm font-bold tracking-wide"
+            className="hidden lg:flex items-center gap-2 btn-premium bg-terracotta text-white px-5 py-2.5 rounded-full text-sm font-semibold tracking-wide"
           >
             <Phone size={15} />
             Nous contacter
@@ -200,7 +200,7 @@ function Navigation() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5, duration: 0.4, ease }}
-              className="mt-4 btn-premium bg-terracotta text-white px-8 py-3 rounded-full font-bold"
+              className="mt-4 btn-premium bg-terracotta text-white px-8 py-3 rounded-full font-semibold"
             >
               <Phone size={16} className="inline mr-2" />
               +229 96 50 50 57
@@ -232,7 +232,7 @@ function Hero() {
   return (
     <section id="accueil" className="relative h-screen min-h-[700px] overflow-hidden">
       {/* Background Image with Parallax */}
-      <motion.div className="absolute inset-0" style={{ y: bgY }}>
+      <motion.div className="absolute inset-0 will-change-transform" style={{ y: bgY }}>
         <Image
           src="/images/nb/hero-construction.jpg"
           alt="Chantier Nature Brique"
@@ -297,11 +297,11 @@ function Hero() {
             transition={{ duration: 0.7, delay: 1.1, ease }}
             className="flex flex-wrap gap-4"
           >
-            <a href="#solutions" className="btn-premium bg-terracotta text-white px-8 py-4 rounded-full font-bold text-sm tracking-wide flex items-center gap-2">
+            <a href="#solutions" className="btn-premium bg-terracotta text-white px-8 py-4 rounded-full font-semibold text-sm tracking-wide flex items-center gap-2">
               Découvrir nos solutions
               <ChevronRight size={18} />
             </a>
-            <a href="#travaux" className="btn-premium bg-white/10 backdrop-blur-sm text-white border border-white/20 px-8 py-4 rounded-full font-bold text-sm tracking-wide hover:bg-white/20">
+            <a href="#travaux" className="btn-premium bg-white/10 backdrop-blur-sm text-white border border-white/20 px-8 py-4 rounded-full font-semibold text-sm tracking-wide hover:bg-white/20">
               Voir nos réalisations
             </a>
           </motion.div>
@@ -344,7 +344,7 @@ function TrustBar() {
     <div className="bg-earth py-4 overflow-hidden">
       <div className="animate-marquee flex whitespace-nowrap">
         {[...items, ...items].map((item, i) => (
-          <span key={i} className="mx-8 text-cream/40 text-xs font-bold tracking-[0.2em] uppercase flex items-center gap-8">
+          <span key={i} className="mx-8 text-cream/40 text-xs font-semibold tracking-[0.2em] uppercase flex items-center gap-8">
             {item}
             <span className="text-terracotta/40">&#9670;</span>
           </span>
@@ -439,6 +439,27 @@ const SOLUTIONS = [
 
 function Solutions() {
   const scrollRef = useRef<HTMLDivElement>(null)
+  const [isDown, setIsDown] = useState(false)
+  const [startX, setStartX] = useState(0)
+  const [scrollLeft, setScrollLeft] = useState(0)
+
+  const onMouseDown = useCallback((e: React.MouseEvent) => {
+    if (!scrollRef.current) return
+    setIsDown(true)
+    setStartX(e.pageX - scrollRef.current.offsetLeft)
+    setScrollLeft(scrollRef.current.scrollLeft)
+  }, [])
+
+  const onMouseLeave = useCallback(() => setIsDown(false), [])
+  const onMouseUp = useCallback(() => setIsDown(false), [])
+
+  const onMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!isDown || !scrollRef.current) return
+    e.preventDefault()
+    const x = e.pageX - scrollRef.current.offsetLeft
+    const walk = (x - startX) * 1.5
+    scrollRef.current.scrollLeft = scrollLeft - walk
+  }, [isDown, startX, scrollLeft])
 
   return (
     <section id="solutions" className="relative py-24 lg:py-32 bg-earth grain-overlay-dark overflow-hidden">
@@ -465,8 +486,15 @@ function Solutions() {
         </div>
       </div>
 
-      {/* Horizontal Scroll Cards */}
-      <div ref={scrollRef} className="scroll-container flex gap-5 lg:gap-6 overflow-x-auto px-6 lg:px-10 pb-4 snap-x snap-mandatory">
+      {/* Horizontal Scroll Cards — drag + snap */}
+      <div
+        ref={scrollRef}
+        className="scroll-container flex gap-5 lg:gap-6 overflow-x-auto px-6 lg:px-10 pb-4 snap-x select-none cursor-grab active:cursor-grabbing"
+        onMouseDown={onMouseDown}
+        onMouseLeave={onMouseLeave}
+        onMouseUp={onMouseUp}
+        onMouseMove={onMouseMove}
+      >
         {SOLUTIONS.map((s, i) => (
           <FadeIn key={s.title} delay={i * 0.1}>
             <div className="flex-shrink-0 w-[300px] sm:w-[340px] lg:w-[380px] snap-start group">
@@ -474,12 +502,12 @@ function Solutions() {
                 <Image src={s.img} alt={s.title} fill className="object-cover" sizes="380px" />
                 <div className="absolute inset-0 bg-gradient-to-t from-earth/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <div className="absolute top-4 left-4">
-                  <span className="inline-block px-3 py-1 rounded-full text-[0.65rem] font-bold tracking-widest uppercase bg-terracotta/90 text-white backdrop-blur-sm">
+                  <span className="inline-block px-3 py-1 rounded-full text-[0.65rem] font-semibold tracking-widest uppercase bg-terracotta/90 text-white backdrop-blur-sm">
                     {s.tag}
                   </span>
                 </div>
                 <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-500">
-                  <span className="text-white text-sm font-bold flex items-center gap-1">
+                  <span className="text-white text-sm font-semibold flex items-center gap-1">
                     En savoir plus <ArrowUpRight size={14} />
                   </span>
                 </div>
@@ -522,8 +550,16 @@ const PROJETS = [
 ]
 
 function Travaux() {
+  const { scrollYProgress } = useScroll({ target: useRef(null), offset: ['start end', 'end start'] })
+  const bgY = useTransform(scrollYProgress, [0, 1], [60, -60])
+
   return (
     <section id="travaux" className="relative py-24 lg:py-32 bg-cream grain-overlay overflow-hidden">
+      {/* Subtle parallax background accent */}
+      <motion.div
+        className="absolute top-0 right-0 w-1/2 h-full bg-terracotta/[0.03] -skew-x-12 -mr-20 pointer-events-none"
+        style={{ y: bgY }}
+      />
       <div className="relative z-[3] max-w-7xl mx-auto px-6 lg:px-10">
         <FadeIn>
           <span className="section-label">Nos Réalisations</span>
@@ -542,7 +578,7 @@ function Travaux() {
               <Image src={PROJETS[0].img} alt={PROJETS[0].title} fill className="object-cover" sizes="(max-width: 1024px) 100vw, 58vw" />
               <div className="absolute inset-0 bg-gradient-to-t from-earth/80 via-earth/20 to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-8 lg:p-10">
-                <span className="text-terracotta-light text-xs font-bold tracking-[0.2em] uppercase">{PROJETS[0].location}</span>
+                <span className="text-terracotta-light text-xs font-semibold tracking-[0.2em] uppercase">{PROJETS[0].location}</span>
                 <h3 className="text-2xl lg:text-3xl font-heading text-cream mt-2 mb-3">{PROJETS[0].title}</h3>
                 <p className="text-cream/60 text-sm max-w-md leading-relaxed">{PROJETS[0].desc}</p>
               </div>
@@ -557,7 +593,7 @@ function Travaux() {
                   <Image src={p.img} alt={p.title} fill className="object-cover" sizes="(max-width: 1024px) 100vw, 42vw" />
                   <div className="absolute inset-0 bg-gradient-to-t from-earth/80 via-earth/10 to-transparent" />
                   <div className="absolute bottom-0 left-0 right-0 p-6 lg:p-8">
-                    <span className="text-terracotta-light text-xs font-bold tracking-[0.2em] uppercase">{p.location}</span>
+                    <span className="text-terracotta-light text-xs font-semibold tracking-[0.2em] uppercase">{p.location}</span>
                     <h3 className="text-xl font-heading text-cream mt-1.5 mb-2">{p.title}</h3>
                     <p className="text-cream/50 text-sm leading-relaxed line-clamp-2">{p.desc}</p>
                   </div>
@@ -672,7 +708,7 @@ function StatsFounder() {
           <div className="absolute inset-0 grain-overlay-dark" />
           {/* Floating stat card */}
           <div className="absolute bottom-6 left-6 right-6 sm:bottom-10 sm:left-10 sm:right-auto glass-card rounded-2xl p-6 z-[3]">
-            <p className="text-cream/60 text-xs font-bold tracking-widest uppercase mb-2">Notre engagement</p>
+            <p className="text-cream/60 text-xs font-semibold tracking-widest uppercase mb-2">Notre engagement</p>
             <p className="text-cream text-lg font-heading leading-snug">
               &laquo; Chaque brique que nous produisons porte la promesse d&apos;un avenir plus durable. &raquo;
             </p>
@@ -707,7 +743,7 @@ function StatsFounder() {
                 <div className="text-3xl lg:text-4xl text-terracotta mb-1">
                   <Counter end={s.value} suffix={s.suffix} />
                 </div>
-                <p className="text-cream/40 text-xs font-bold tracking-widest uppercase">{s.label}</p>
+                <p className="text-cream/40 text-xs font-semibold tracking-widest uppercase">{s.label}</p>
               </motion.div>
             ))}
           </StaggerGroup>
@@ -738,7 +774,7 @@ function MissionSection() {
               <Award size={18} className="text-terracotta" />
             </div>
             <div className="text-left">
-              <p className="text-earth font-bold text-sm">Franck Kidjo</p>
+              <p className="text-earth font-semibold text-sm">Franck Kidjo</p>
               <p className="text-warm-gray text-xs">Fondateur & Directeur Général</p>
             </div>
           </div>
@@ -775,11 +811,11 @@ function CtaSection() {
         </FadeIn>
         <FadeIn delay={0.3}>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="tel:+22996505057" className="btn-premium bg-terracotta text-white px-8 py-4 rounded-full font-bold text-sm tracking-wide flex items-center justify-center gap-2">
+            <a href="tel:+22996505057" className="btn-premium bg-terracotta text-white px-8 py-4 rounded-full font-semibold text-sm tracking-wide flex items-center justify-center gap-2">
               <Phone size={16} />
               +229 96 50 50 57
             </a>
-            <a href="mailto:info@naturebrique.com" className="btn-premium bg-white/10 backdrop-blur-sm text-white border border-white/20 px-8 py-4 rounded-full font-bold text-sm tracking-wide flex items-center justify-center gap-2 hover:bg-white/20">
+            <a href="mailto:info@naturebrique.com" className="btn-premium bg-white/10 backdrop-blur-sm text-white border border-white/20 px-8 py-4 rounded-full font-semibold text-sm tracking-wide flex items-center justify-center gap-2 hover:bg-white/20">
               <Mail size={16} />
               info@naturebrique.com
             </a>
@@ -819,7 +855,7 @@ function Footer() {
 
           {/* Navigation */}
           <div>
-            <h4 className="text-cream font-bold text-sm tracking-widest uppercase mb-5">Navigation</h4>
+            <h4 className="text-cream font-semibold text-sm tracking-widest uppercase mb-5">Navigation</h4>
             <ul className="space-y-3">
               {NAV_LINKS.map((link) => (
                 <li key={link.href}>
@@ -833,7 +869,7 @@ function Footer() {
 
           {/* Contact */}
           <div>
-            <h4 className="text-cream font-bold text-sm tracking-widest uppercase mb-5">Contact</h4>
+            <h4 className="text-cream font-semibold text-sm tracking-widest uppercase mb-5">Contact</h4>
             <ul className="space-y-3">
               <li>
                 <a href="tel:+22996505057" className="text-cream/40 text-sm hover:text-terracotta transition-colors flex items-center gap-2">
@@ -860,7 +896,7 @@ function Footer() {
 
           {/* Usine */}
           <div>
-            <h4 className="text-cream font-bold text-sm tracking-widest uppercase mb-5">Usine</h4>
+            <h4 className="text-cream font-semibold text-sm tracking-widest uppercase mb-5">Usine</h4>
             <div className="space-y-3 text-cream/40 text-sm">
               <p className="flex items-start gap-2">
                 <MapPin size={14} className="shrink-0 mt-0.5" />
