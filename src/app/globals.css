@@ -6,8 +6,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-body: var(--font-dm-sans), 'DM Sans', system-ui, sans-serif;
-  --font-heading: var(--font-dm-serif-display), 'DM Serif Display', Georgia, serif;
+  --font-body: var(--font-outfit), 'Outfit', system-ui, sans-serif;
+  --font-heading: var(--font-playfair-display), 'Playfair Display', Georgia, serif;
 
   --color-terracotta: #CE7756;
   --color-terracotta-dark: #A85C3E;
@@ -46,10 +46,14 @@
   }
 }
 
-/* ── Smooth Scroll with Lenis-like feel ── */
+/* ── Premium Smooth Scroll ── */
 html {
   scroll-behavior: smooth;
   overflow-x: hidden;
+  overscroll-behavior: none;
+}
+body {
+  scroll-behavior: smooth;
 }
 
 /* ── Grain Texture Overlay ── */
@@ -90,12 +94,42 @@ html {
 /* ── Image Reveal Hover ── */
 .img-reveal {
   overflow: hidden;
+  clip-path: inset(0);
 }
 .img-reveal img {
-  transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1), filter 0.8s ease;
+  will-change: transform;
 }
 .img-reveal:hover img {
-  transform: scale(1.06);
+  transform: scale(1.07);
+}
+
+/* ── Clip Reveal Animation Base ── */
+.clip-reveal-up {
+  clip-path: inset(100% 0 0 0);
+  transition: clip-path 1s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.clip-reveal-up.revealed {
+  clip-path: inset(0 0 0 0);
+}
+.clip-reveal-left {
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 1.1s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.clip-reveal-left.revealed {
+  clip-path: inset(0 0 0 0);
+}
+
+/* ── Parallax Layer ── */
+.parallax-layer {
+  will-change: transform;
+  transition: none;
+}
+
+/* ── Section Separator ── */
+.section-divider {
+  height: 120px;
+  background: linear-gradient(to bottom, var(--from), var(--to));
 }
 
 /* ── Premium Button ── */

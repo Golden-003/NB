@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
-import { DM_Serif_Display, DM_Sans } from "next/font/google";
+import { Playfair_Display, Outfit } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 
-const dmSerifDisplay = DM_Serif_Display({
-  weight: "400",
+const playfairDisplay = Playfair_Display({
+  weight: ["400", "700", "900"],
   subsets: ["latin"],
   display: "swap",
   variable: "--font-heading",
 });
 
-const dmSans = DM_Sans({
+const outfit = Outfit({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-body",
@@ -191,7 +191,7 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="fr" suppressHydrationWarning className={`${dmSerifDisplay.variable} ${dmSans.variable}`}>
+    <html lang="fr" suppressHydrationWarning className={`${playfairDisplay.variable} ${outfit.variable}`}>
       <head>
         <meta name="geo.region" content="BJ-LI" />
         <meta name="geo.placename" content="Cotonou" />

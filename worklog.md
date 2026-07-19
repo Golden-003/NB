@@ -1,33 +1,37 @@
 ---
 Task ID: 1
-Agent: Super Z (main)
-Task: Refonte UI premium de la homepage Nature Brique + remplacement des images par les vraies photos
+Agent: Main Agent
+Task: Typography replacement + Scroll animation overhaul + Photo changes for Nature Brique homepage
 
 Work Log:
-- Extrait 26+ photos réelles du site naturebrique.com (homepage, produits, pôle construction, à propos, documentation)
-- Téléchargé et sauvegardé dans /public/images/nb/ avec vérification des dimensions
-- Reconstruit entièrement globals.css avec : grain texture overlay, glassmorphism, premium buttons, bento card hovers, scroll progress bar, custom scrollbar, section labels, marquee animation, horizontal scroll snap, SVG curve dividers, selection color
-- Reconstruit entièrement page.tsx avec UI premium :
-  - Hero cinématique avec parallax Framer Motion, gradient multi-couches, courbe SVG de transition
-  - Scroll progress bar animée (terracotta→mint gradient)
-  - Trust Bar avec marquee infini
-  - Avantages en Bento Grid asymétrique (6 cartes, 2 large)
-  - Photo Mosaic Strip (grille 5 images avec grayscale hover)
-  - Solutions en horizontal scroll snap avec flèches de navigation
-  - Réalisations en grille asymétrique 7/5 colonnes
-  - Process Section (4 étapes numérotées)
-  - Services en liste numérotée avec hover animé
-  - Stats/Founder en split-screen avec counters animés et glassmorphism card
-  - Section citation du fondateur
-  - CTA avec fond photo
-  - Footer 4 colonnes premium
-- Ajouté next.config.ts image qualities [75, 85, 90]
-- Toutes les photos viennent de Nature Brique (naturebrique.com)
-- Build successful, 0 erreurs
+- Read current project state: layout.tsx (DM Serif Display + DM Sans), globals.css, page.tsx (1013 lines, 12 sections)
+- Identified 26+ photos in /public/images/nb/
+- Replaced DM Serif Display → Playfair Display (weights 400, 700, 900) for headings
+- Replaced DM Sans → Outfit for body text
+- Updated globals.css font variables, added clip-reveal CSS, parallax-layer, overscroll-behavior, improved img-reveal transitions
+- Rewrote entire page.tsx animation system:
+  - Added TextReveal (mask-based overflow hidden line reveal with translateY 100%→0)
+  - Added ImageReveal (scale 1.08→1 + opacity + y for images)
+  - Added SlideIn (directional left/right/up reveals)
+  - Added ParallaxSection component (scroll-linked y transform)
+  - Improved FadeIn with better easing and longer durations
+  - Improved StaggerGroup with scale 0.97→1 in staggerItem
+- Hero: line-by-line TextReveal for h1, scroll-linked zoom (scale 1.1→1.2), scroll-linked contentY, changed photo to facade2.jpg
+- Avantages: directional SlideIn for header, floating parallax accent shape
+- PhotoMosaic: scroll-linked horizontal parallax, ImageReveal for each photo
+- Solutions: directional SlideIn headers
+- Travaux: scroll-linked parallax bg accent, ImageReveal for all projects
+- ProcessSection: scroll-linked connector line with scaleX progress
+- Services: directional SlideIn for headers
+- StatsFounder: scroll-linked image scale (1.15→1→1.1), changed about photo to fab-production.jpg, directional SlideIn for content
+- MissionSection: scroll-linked quote scale (0.92→1→0.98)
+- CtaSection: scroll-linked parallax background, changed photo to work-site3.jpg
+- Build: 0 errors, all pages generated successfully
+- Server: runs on localhost but sandbox kills background processes
 
 Stage Summary:
-- Homepage entièrement reconstruite avec design premium
-- 26 photos réelles Nature Brique téléchargées et intégrées
-- 12 sections au total avec transitions fluides
-- SEO local (4 JSON-LD, geo tags, OG/Twitter) préservé dans layout.tsx
-- Build production réussi sans erreurs
+- Typography: Playfair Display + Outfit (premium pairing for ceramic brand)
+- Scroll: 6 new animation components, scroll-linked parallax on 5+ sections, clip-path reveals
+- Photos: hero→facade2.jpg, about→fab-production.jpg, CTA→work-site3.jpg
+- Build passes with 0 errors
+- Preview issue: sandbox kills background processes (infrastructure limitation)

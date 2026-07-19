@@ -30,11 +30,30 @@ import {
 } from 'lucide-react'
 
 /* ═══════════════════════════════════════════
-   ANIMATION PRIMITIVES
+   PREMIUM ANIMATION PRIMITIVES
    ═══════════════════════════════════════════ */
-const ease = [0.22, 1, 0.36, 1] as const
+const easeOut = [0.22, 1, 0.36, 1] as const
+const easeSmooth = [0.25, 0.46, 0.45, 0.94] as const
 
-function FadeIn({ children, delay = 0, y = 20, className = '' }: { children: React.ReactNode; delay?: number; y?: number; className?: string }) {
+/* ── TextReveal: mask-based line reveal (overflow hidden wrapper) ── */
+function TextReveal({ children, delay = 0, className = '' }: { children: React.ReactNode; delay?: number; className?: string }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const inView = useInView(ref, { once: true, margin: '-60px' })
+  return (
+    <div ref={ref} className={`overflow-hidden ${className}`}>
+      <motion.div
+        initial={{ opacity: 0, y: '100%' }}
+        animate={inView ? { opacity: 1, y: '0%' } : {}}
+        transition={{ duration: 1, delay, ease: easeOut }}
+      >
+        {children}
+      </motion.div>
+    </div>
+  )
+}
+
+/* ── FadeIn: smooth fade + translate (general purpose) ── */
+function FadeIn({ children, delay = 0, y = 30, duration = 0.95, className = '' }: { children: React.ReactNode; delay?: number; y?: number; duration?: number; className?: string }) {
   const ref = useRef<HTMLDivElement>(null)
   const inView = useInView(ref, { once: true, margin: '-80px' })
   return (
@@ -42,7 +61,7 @@ function FadeIn({ children, delay = 0, y = 20, className = '' }: { children: Rea
       ref={ref}
       initial={{ opacity: 0, y }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.9, delay, ease: [0.25, 0.1, 0.25, 1] }}
+      transition={{ duration, delay, ease: easeOut }}
       className={className}
     >
       {children}
@@ -50,7 +69,44 @@ function FadeIn({ children, delay = 0, y = 20, className = '' }: { children: Rea
   )
 }
 
-function StaggerGroup({ children, className = '', stagger = 0.08 }: { children: React.ReactNode; className?: string; stagger?: number }) {
+/* ── ImageReveal: scale + fade for images ── */
+function ImageReveal({ children, delay = 0, className = '' }: { children: React.ReactNode; delay?: number; className?: string }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const inView = useInView(ref, { once: true, margin: '-40px' })
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, scale: 1.08, y: 15 }}
+      animate={inView ? { opacity: 1, scale: 1, y: 0 } : {}}
+      transition={{ duration: 1.3, delay, ease: easeOut }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  )
+}
+
+/* ── SlideIn: directional reveal ── */
+function SlideIn({ children, direction = 'left', delay = 0, className = '' }: { children: React.ReactNode; direction?: 'left' | 'right' | 'up'; delay?: number; className?: string }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const inView = useInView(ref, { once: true, margin: '-80px' })
+  const x = direction === 'left' ? -50 : direction === 'right' ? 50 : 0
+  const yDir = direction === 'up' ? 50 : 30
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, x, y: yDir }}
+      animate={inView ? { opacity: 1, x: 0, y: 0 } : {}}
+      transition={{ duration: 1.1, delay, ease: easeOut }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  )
+}
+
+/* ── StaggerGroup: improved stagger container ── */
+function StaggerGroup({ children, className = '', stagger = 0.1 }: { children: React.ReactNode; className?: string; stagger?: number }) {
   const ref = useRef<HTMLDivElement>(null)
   const inView = useInView(ref, { once: true, margin: '-60px' })
   return (
@@ -67,8 +123,22 @@ function StaggerGroup({ children, className = '', stagger = 0.08 }: { children: 
 }
 
 const staggerItem = {
-  hidden: { opacity: 0, y: 18 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.25, 0.1, 0.25, 1] } },
+  hidden: { opacity: 0, y: 35, scale: 0.97 },
+  show: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.9, ease: easeOut as unknown as number[] } },
+}
+
+/* ── ParallaxSection: scroll-linked parallax wrapper ── */
+function ParallaxSection({ children, speed = 60, className = '' }: { children: React.ReactNode; speed?: number; className?: string }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] })
+  const y = useTransform(scrollYProgress, [0, 1], [speed, -speed])
+  return (
+    <div ref={ref} className={className}>
+      <motion.div style={{ y }} className="will-change-transform">
+        {children}
+      </motion.div>
+    </div>
+  )
 }
 
 /* ═══════════════════════════════════════════
@@ -81,7 +151,7 @@ function Counter({ end, suffix = '', prefix = '' }: { end: number; suffix?: stri
   useEffect(() => {
     if (!inView) return
     let start = 0
-    const duration = 2000
+    const duration = 2200
     const step = end / (duration / 16)
     const timer = setInterval(() => {
       start += step
@@ -117,22 +187,17 @@ function Navigation() {
 
   return (
     <>
-      {/* Scroll Progress */}
       <ScrollProgress />
-
       <motion.nav
         initial={{ y: -100 }}
         animate={{ y: 0 }}
-        transition={{ duration: 0.8, ease }}
+        transition={{ duration: 0.9, ease: easeOut as unknown as number[] }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? 'nav-scrolled' : 'bg-transparent'}`}
       >
         <div className="max-w-7xl mx-auto px-6 lg:px-10 flex items-center justify-between h-20">
-          {/* Logo */}
           <a href="#accueil" className="relative z-50">
             <Image src="/images/logo.png" alt="Nature Brique" width={160} height={40} className="h-9 w-auto" priority />
           </a>
-
-          {/* Desktop Links */}
           <div className="hidden lg:flex items-center gap-1">
             {NAV_LINKS.map((link) => (
               <a
@@ -148,8 +213,6 @@ function Navigation() {
               </a>
             ))}
           </div>
-
-          {/* CTA Desktop */}
           <a
             href="tel:+22996505057"
             className="hidden lg:flex items-center gap-2 btn-premium bg-terracotta text-white px-5 py-2.5 rounded-full text-sm font-semibold tracking-wide"
@@ -157,8 +220,6 @@ function Navigation() {
             <Phone size={15} />
             Nous contacter
           </a>
-
-          {/* Mobile Toggle */}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
             className="lg:hidden relative z-50 p-2"
@@ -173,13 +234,13 @@ function Navigation() {
         </div>
       </motion.nav>
 
-      {/* Mobile Menu */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.4 }}
             className="fixed inset-0 z-40 bg-earth/98 flex flex-col items-center justify-center gap-6"
           >
             {NAV_LINKS.map((link, i) => (
@@ -187,9 +248,10 @@ function Navigation() {
                 key={link.href}
                 href={link.href}
                 onClick={() => setMobileOpen(false)}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 25 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 + i * 0.06, duration: 0.4, ease }}
+                exit={{ opacity: 0, y: 15 }}
+                transition={{ delay: 0.08 + i * 0.05, duration: 0.5, ease: easeOut as unknown as number[] }}
                 className="text-cream text-2xl font-heading tracking-wide hover:text-terracotta transition-colors"
               >
                 {link.label}
@@ -197,9 +259,10 @@ function Navigation() {
             ))}
             <motion.a
               href="tel:+22996505057"
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 25 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5, duration: 0.4, ease }}
+              exit={{ opacity: 0, y: 15 }}
+              transition={{ delay: 0.5, duration: 0.5, ease: easeOut as unknown as number[] }}
               className="mt-4 btn-premium bg-terracotta text-white px-8 py-3 rounded-full font-semibold"
             >
               <Phone size={16} className="inline mr-2" />
@@ -222,29 +285,31 @@ function ScrollProgress() {
 }
 
 /* ═══════════════════════════════════════════
-   HERO SECTION — Cinematic
+   HERO SECTION — Cinematic with TextReveal
    ═══════════════════════════════════════════ */
 function Hero() {
   const { scrollY } = useScroll()
-  const bgY = useTransform(scrollY, [0, 600], [0, 150])
-  const opacity = useTransform(scrollY, [0, 500], [1, 0])
+  const bgY = useTransform(scrollY, [0, 800], [0, 200])
+  const bgScale = useTransform(scrollY, [0, 800], [1.1, 1.2])
+  const contentOpacity = useTransform(scrollY, [0, 450], [1, 0])
+  const contentY = useTransform(scrollY, [0, 450], [0, 60])
 
   return (
     <section id="accueil" className="relative h-screen min-h-[700px] overflow-hidden">
-      {/* Background Image with Parallax */}
-      <motion.div className="absolute inset-0 will-change-transform" style={{ y: bgY }}>
+      {/* Background Image with Parallax + Zoom */}
+      <motion.div className="absolute inset-0 will-change-transform" style={{ y: bgY, scale: bgScale }}>
         <Image
-          src="/images/nb/hero-construction.jpg"
-          alt="Chantier Nature Brique"
+          src="/images/nb/facade2.jpg"
+          alt="Façade en brique Nature Brique"
           fill
-          className="object-cover scale-110"
+          className="object-cover"
           priority
           quality={85}
         />
       </motion.div>
 
       {/* Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-earth/70 via-earth/40 to-earth/80 z-[1]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-earth/70 via-earth/35 to-earth/85 z-[1]" />
 
       {/* Grain */}
       <div className="absolute inset-0 grain-overlay-dark z-[2]" />
@@ -256,45 +321,50 @@ function Hero() {
         </svg>
       </div>
 
-      {/* Content */}
+      {/* Content with scroll-linked movement */}
       <motion.div
-        style={{ opacity }}
+        style={{ opacity: contentOpacity, y: contentY }}
         className="relative z-[3] flex flex-col justify-end h-full max-w-7xl mx-auto px-6 lg:px-10 pb-24 lg:pb-32"
       >
         <div className="max-w-3xl">
+          {/* Section label with stagger */}
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
+            initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.3, ease }}
+            transition={{ duration: 0.9, delay: 0.4, ease: easeOut as unknown as number[] }}
             className="section-label !text-terracotta-light mb-6"
           >
             Depuis 2011 au Bénin
           </motion.div>
 
-          <motion.h1
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.5, ease }}
-            className="text-cream text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-heading leading-[1.05] mb-6"
-          >
-            Construisons<br />
-            notre monde<br />
-            <span className="text-terracotta-light">écologique</span>
-          </motion.h1>
+          {/* H1 — line-by-line reveal */}
+          <h1 className="text-cream text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-heading leading-[1.08] mb-6">
+            <TextReveal delay={0.6}>
+              <span className="block">Construisons</span>
+            </TextReveal>
+            <TextReveal delay={0.75}>
+              <span className="block">notre monde</span>
+            </TextReveal>
+            <TextReveal delay={0.9}>
+              <span className="block text-terracotta-light">écologique</span>
+            </TextReveal>
+          </h1>
 
+          {/* Subtitle */}
           <motion.p
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.8, ease }}
+            transition={{ duration: 0.9, delay: 1.1, ease: easeOut as unknown as number[] }}
             className="text-cream/70 text-lg md:text-xl max-w-xl mb-10 leading-relaxed"
           >
             Première industrie céramique du Bénin. Des briques en terre cuite pour un habitat durable, confortable et authentique.
           </motion.p>
 
+          {/* CTAs */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 25 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 1.1, ease }}
+            transition={{ duration: 0.8, delay: 1.35, ease: easeOut as unknown as number[] }}
             className="flex flex-wrap gap-4"
           >
             <a href="#solutions" className="btn-premium bg-terracotta text-white px-8 py-4 rounded-full font-semibold text-sm tracking-wide flex items-center gap-2">
@@ -312,7 +382,8 @@ function Hero() {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 1.5, duration: 1 }}
+        transition={{ delay: 1.8, duration: 1 }}
+        style={{ opacity: contentOpacity }}
         className="absolute bottom-8 left-1/2 -translate-x-1/2 z-[3] flex flex-col items-center gap-2"
       >
         <span className="text-cream/40 text-xs tracking-widest uppercase">Scroll</span>
@@ -355,7 +426,7 @@ function TrustBar() {
 }
 
 /* ═══════════════════════════════════════════
-   AVANTAGES — Bento Grid
+   AVANTAGES — Bento Grid with premium reveals
    ═══════════════════════════════════════════ */
 const AVANTAGES = [
   { icon: Thermometer, title: 'Confort Thermique', desc: 'Régulation naturelle de la température. Jusqu\'à 8°C de différence avec le béton.', span: 'md:col-span-2' },
@@ -366,32 +437,42 @@ const AVANTAGES = [
 ]
 
 function Avantages() {
+  const sectionRef = useRef<HTMLDivElement>(null)
+  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ['start end', 'end start'] })
+  const accentX = useTransform(scrollYProgress, [0, 1], ['-10%', '10%'])
+
   return (
-    <section id="avantages" className="relative py-24 lg:py-32 bg-cream grain-overlay overflow-hidden">
+    <section id="avantages" ref={sectionRef} className="relative py-24 lg:py-32 bg-cream grain-overlay overflow-hidden">
+      {/* Floating accent shape */}
+      <motion.div
+        className="absolute top-20 -left-32 w-64 h-64 rounded-full bg-terracotta/[0.04] blur-3xl pointer-events-none"
+        style={{ x: accentX }}
+      />
+
       <div className="relative z-[3] max-w-7xl mx-auto px-6 lg:px-10">
         {/* Section Header — Asymmetric */}
         <div className="grid lg:grid-cols-12 gap-8 lg:gap-16 mb-16 lg:mb-20">
           <div className="lg:col-span-7">
-            <FadeIn>
+            <SlideIn direction="left">
               <span className="section-label">Pourquoi la terre cuite</span>
-            </FadeIn>
-            <FadeIn delay={0.1}>
+            </SlideIn>
+            <TextReveal delay={0.15}>
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-heading text-earth mt-4 leading-tight">
                 Un matériau d&apos;exception<br />pour un habitat <span className="text-terracotta">durable</span>
               </h2>
-            </FadeIn>
+            </TextReveal>
           </div>
           <div className="lg:col-span-5 flex items-end">
-            <FadeIn delay={0.2}>
+            <SlideIn direction="right" delay={0.2}>
               <p className="text-warm-gray text-base leading-relaxed">
                 La brique en terre cuite allie performance technique, confort au quotidien et respect de l&apos;environnement. Un choix responsable pour les générations futures.
               </p>
-            </FadeIn>
+            </SlideIn>
           </div>
         </div>
 
         {/* Bento Grid */}
-        <StaggerGroup className="grid md:grid-cols-3 gap-4 lg:gap-5" stagger={0.08}>
+        <StaggerGroup className="grid md:grid-cols-3 gap-4 lg:gap-5" stagger={0.1}>
           {AVANTAGES.map((item) => (
             <motion.div key={item.title} variants={staggerItem} className={`bento-card ${item.span} bg-white rounded-2xl p-8 lg:p-10 relative group`}>
               <div className="w-12 h-12 rounded-xl bg-terracotta/8 flex items-center justify-center mb-6 group-hover:bg-terracotta group-hover:scale-110 transition-all duration-500">
@@ -403,6 +484,35 @@ function Avantages() {
           ))}
         </StaggerGroup>
       </div>
+    </section>
+  )
+}
+
+/* ═══════════════════════════════════════════
+   PHOTO MOSAIC STRIP
+   ═══════════════════════════════════════════ */
+const MOSAIC_IMGS = [
+  { src: '/images/nb/facade3.jpg', span: 'row-span-2' },
+  { src: '/images/nb/brick-detail2.jpg', span: '' },
+  { src: '/images/nb/work-site3.jpg', span: '' },
+  { src: '/images/nb/ext-3.jpg', span: 'col-span-2' },
+  { src: '/images/nb/facade4.jpg', span: '' },
+]
+
+function PhotoMosaic() {
+  const sectionRef = useRef<HTMLDivElement>(null)
+  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ['start end', 'end start'] })
+  const x = useTransform(scrollYProgress, [0, 1], ['-3%', '3%'])
+
+  return (
+    <section ref={sectionRef} className="relative py-2 lg:py-4 bg-earth-dark overflow-hidden">
+      <motion.div style={{ x }} className="max-w-7xl mx-auto px-4 lg:px-10 grid grid-cols-2 md:grid-cols-4 gap-1.5 lg:gap-2 auto-rows-[120px] md:auto-rows-[160px] lg:auto-rows-[200px]">
+        {MOSAIC_IMGS.map((img, i) => (
+          <ImageReveal key={img.src} delay={i * 0.07} className={`img-reveal rounded-lg overflow-hidden ${img.span}`}>
+            <Image src={img.src} alt="" fill className="object-cover grayscale-[20%] hover:grayscale-0 transition-all duration-700 hover:scale-105" sizes="400px" />
+          </ImageReveal>
+        ))}
+      </motion.div>
     </section>
   )
 }
@@ -464,16 +574,16 @@ function Solutions() {
   return (
     <section id="solutions" className="relative py-24 lg:py-32 bg-earth grain-overlay-dark overflow-hidden">
       <div className="relative z-[3] max-w-7xl mx-auto px-6 lg:px-10">
-        <FadeIn>
+        <SlideIn direction="left">
           <span className="section-label">Nos Solutions</span>
-        </FadeIn>
+        </SlideIn>
         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between mt-4 mb-12 lg:mb-16">
-          <FadeIn delay={0.1}>
+          <SlideIn direction="left" delay={0.1}>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-heading text-cream leading-tight">
               Des produits pour<br />chaque <span className="text-terracotta">projet</span>
             </h2>
-          </FadeIn>
-          <FadeIn delay={0.2}>
+          </SlideIn>
+          <SlideIn direction="right" delay={0.2}>
             <div className="hidden lg:flex gap-3 mt-6 lg:mt-0">
               <button onClick={() => scrollRef.current?.scrollBy({ left: -400, behavior: 'smooth' })} className="w-12 h-12 rounded-full border border-cream/20 flex items-center justify-center text-cream/60 hover:text-cream hover:border-cream/40 transition-all">
                 <ChevronRight size={18} className="rotate-180" />
@@ -482,7 +592,7 @@ function Solutions() {
                 <ChevronRight size={18} />
               </button>
             </div>
-          </FadeIn>
+          </SlideIn>
         </div>
       </div>
 
@@ -496,7 +606,7 @@ function Solutions() {
         onMouseMove={onMouseMove}
       >
         {SOLUTIONS.map((s, i) => (
-          <FadeIn key={s.title} delay={i * 0.1}>
+          <ImageReveal key={s.title} delay={i * 0.12}>
             <div className="flex-shrink-0 w-[300px] sm:w-[340px] lg:w-[380px] snap-start group">
               <div className="img-reveal relative rounded-2xl overflow-hidden aspect-[4/5] bg-earth-light/30 mb-5">
                 <Image src={s.img} alt={s.title} fill className="object-cover" sizes="380px" />
@@ -515,7 +625,7 @@ function Solutions() {
               <h3 className="text-xl font-heading text-cream mb-2">{s.title}</h3>
               <p className="text-cream/50 text-sm leading-relaxed">{s.desc}</p>
             </div>
-          </FadeIn>
+          </ImageReveal>
         ))}
       </div>
     </section>
@@ -523,7 +633,7 @@ function Solutions() {
 }
 
 /* ═══════════════════════════════════════════
-   NOS TRAVAUX — Asymmetric Showcase
+   NOS TRAVAUX — Asymmetric Showcase with parallax
    ═══════════════════════════════════════════ */
 const PROJETS = [
   {
@@ -550,45 +660,48 @@ const PROJETS = [
 ]
 
 function Travaux() {
-  const { scrollYProgress } = useScroll({ target: useRef(null), offset: ['start end', 'end start'] })
-  const bgY = useTransform(scrollYProgress, [0, 1], [60, -60])
+  const sectionRef = useRef<HTMLDivElement>(null)
+  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ['start end', 'end start'] })
+  const bgY = useTransform(scrollYProgress, [0, 1], [80, -80])
 
   return (
-    <section id="travaux" className="relative py-24 lg:py-32 bg-cream grain-overlay overflow-hidden">
+    <section id="travaux" ref={sectionRef} className="relative py-24 lg:py-32 bg-cream grain-overlay overflow-hidden">
       {/* Subtle parallax background accent */}
       <motion.div
         className="absolute top-0 right-0 w-1/2 h-full bg-terracotta/[0.03] -skew-x-12 -mr-20 pointer-events-none"
         style={{ y: bgY }}
       />
       <div className="relative z-[3] max-w-7xl mx-auto px-6 lg:px-10">
-        <FadeIn>
+        <SlideIn direction="left">
           <span className="section-label">Nos Réalisations</span>
-        </FadeIn>
-        <FadeIn delay={0.1}>
+        </SlideIn>
+        <TextReveal delay={0.1}>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-heading text-earth mt-4 mb-16 lg:mb-20 leading-tight">
             Des projets qui<br /><span className="text-terracotta">inspirent</span>
           </h2>
-        </FadeIn>
+        </TextReveal>
 
         {/* Asymmetric Grid */}
         <div className="grid lg:grid-cols-12 gap-5 lg:gap-6">
           {/* Large Featured Project */}
-          <FadeIn className="lg:col-span-7">
-            <div className="img-reveal relative rounded-2xl overflow-hidden aspect-[4/3] group cursor-pointer">
-              <Image src={PROJETS[0].img} alt={PROJETS[0].title} fill className="object-cover" sizes="(max-width: 1024px) 100vw, 58vw" />
-              <div className="absolute inset-0 bg-gradient-to-t from-earth/80 via-earth/20 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-8 lg:p-10">
-                <span className="text-terracotta-light text-xs font-semibold tracking-[0.2em] uppercase">{PROJETS[0].location}</span>
-                <h3 className="text-2xl lg:text-3xl font-heading text-cream mt-2 mb-3">{PROJETS[0].title}</h3>
-                <p className="text-cream/60 text-sm max-w-md leading-relaxed">{PROJETS[0].desc}</p>
+          <div className="lg:col-span-7">
+            <ImageReveal>
+              <div className="img-reveal relative rounded-2xl overflow-hidden aspect-[4/3] group cursor-pointer">
+                <Image src={PROJETS[0].img} alt={PROJETS[0].title} fill className="object-cover" sizes="(max-width: 1024px) 100vw, 58vw" />
+                <div className="absolute inset-0 bg-gradient-to-t from-earth/80 via-earth/20 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-8 lg:p-10">
+                  <span className="text-terracotta-light text-xs font-semibold tracking-[0.2em] uppercase">{PROJETS[0].location}</span>
+                  <h3 className="text-2xl lg:text-3xl font-heading text-cream mt-2 mb-3">{PROJETS[0].title}</h3>
+                  <p className="text-cream/60 text-sm max-w-md leading-relaxed">{PROJETS[0].desc}</p>
+                </div>
               </div>
-            </div>
-          </FadeIn>
+            </ImageReveal>
+          </div>
 
           {/* Stacked Right Projects */}
           <div className="lg:col-span-5 flex flex-col gap-5 lg:gap-6">
             {PROJETS.slice(1).map((p, i) => (
-              <FadeIn key={p.title} delay={0.15 + i * 0.1}>
+              <ImageReveal key={p.title} delay={0.15 + i * 0.12}>
                 <div className="img-reveal relative rounded-2xl overflow-hidden aspect-[16/10] group cursor-pointer">
                   <Image src={p.img} alt={p.title} fill className="object-cover" sizes="(max-width: 1024px) 100vw, 42vw" />
                   <div className="absolute inset-0 bg-gradient-to-t from-earth/80 via-earth/10 to-transparent" />
@@ -598,10 +711,63 @@ function Travaux() {
                     <p className="text-cream/50 text-sm leading-relaxed line-clamp-2">{p.desc}</p>
                   </div>
                 </div>
-              </FadeIn>
+              </ImageReveal>
             ))}
           </div>
         </div>
+      </div>
+    </section>
+  )
+}
+
+/* ═══════════════════════════════════════════
+   PROCESS SECTION — How we work
+   ═══════════════════════════════════════════ */
+const PROCESS_STEPS = [
+  { num: '01', title: 'Consultation', desc: 'Échange avec notre équipe pour comprendre vos besoins, votre budget et vos contraintes.' },
+  { num: '02', title: 'Conception', desc: 'Étude technique et recommandations sur les solutions les plus adaptées à votre projet.' },
+  { num: '03', title: 'Production', desc: 'Fabrication de vos briques dans notre usine à Zogbodomey avec contrôle qualité rigoureux.' },
+  { num: '04', title: 'Réalisation', desc: 'Pose professionnelle par notre pôle construction avec garantie décennale sur tous nos ouvrages.' },
+]
+
+function ProcessSection() {
+  const sectionRef = useRef<HTMLDivElement>(null)
+  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ['start end', 'end start'] })
+  const lineScale = useTransform(scrollYProgress, [0.1, 0.6], [0, 1])
+
+  return (
+    <section ref={sectionRef} className="relative py-20 lg:py-28 bg-cream grain-overlay overflow-hidden">
+      <div className="relative z-[3] max-w-7xl mx-auto px-6 lg:px-10">
+        <div className="text-center mb-16">
+          <FadeIn>
+            <span className="section-label justify-center">Notre Processus</span>
+          </FadeIn>
+          <TextReveal delay={0.1}>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-heading text-earth mt-4 leading-tight">
+              De l&apos;idée à la <span className="text-terracotta">réalité</span>
+            </h2>
+          </TextReveal>
+        </div>
+
+        <StaggerGroup className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8" stagger={0.13}>
+          {PROCESS_STEPS.map((step, idx) => (
+            <motion.div key={step.num} variants={staggerItem} className="relative group">
+              {/* Connector line with scroll progress */}
+              {idx < 3 && (
+                <motion.div
+                  className="hidden lg:block absolute top-8 left-[calc(50%+2.5rem)] w-[calc(100%-5rem)] h-px origin-left"
+                  style={{
+                    scaleX: lineScale,
+                    background: 'linear-gradient(90deg, #CE7756, transparent)',
+                  }}
+                />
+              )}
+              <span className="text-5xl lg:text-6xl font-heading text-earth/[0.06] group-hover:text-terracotta/20 transition-colors duration-500">{step.num}</span>
+              <h3 className="text-xl font-heading text-earth mt-2 mb-3 group-hover:text-terracotta transition-colors duration-300">{step.title}</h3>
+              <p className="text-warm-gray text-sm leading-relaxed">{step.desc}</p>
+            </motion.div>
+          ))}
+        </StaggerGroup>
       </div>
     </section>
   )
@@ -637,38 +803,31 @@ function Services() {
   return (
     <section id="services" className="relative py-24 lg:py-32 bg-cream-dark grain-overlay overflow-hidden">
       <div className="relative z-[3] max-w-7xl mx-auto px-6 lg:px-10">
-        <FadeIn>
+        <SlideIn direction="left">
           <span className="section-label">Nos Services</span>
-        </FadeIn>
-        <FadeIn delay={0.1}>
+        </SlideIn>
+        <TextReveal delay={0.1}>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-heading text-earth mt-4 mb-16 lg:mb-20 leading-tight">
             Un accompagnement<br /><span className="text-terracotta">complet</span>
           </h2>
-        </FadeIn>
+        </TextReveal>
 
         <div className="space-y-0">
           {SERVICES.map((s, i) => (
-            <FadeIn key={s.title} delay={i * 0.08}>
+            <FadeIn key={s.title} delay={i * 0.09} duration={0.85}>
               <div className="group flex flex-col lg:flex-row lg:items-center gap-6 lg:gap-12 py-8 lg:py-10 border-b border-earth/8 first:border-t cursor-pointer">
-                {/* Number */}
                 <span className="text-earth/15 font-heading text-3xl lg:text-4xl lg:w-16 shrink-0">
                   0{i + 1}
                 </span>
-
-                {/* Icon */}
                 <div className="w-14 h-14 rounded-2xl bg-terracotta/8 flex items-center justify-center shrink-0 group-hover:bg-terracotta group-hover:scale-110 transition-all duration-500">
                   <s.icon size={24} className="text-terracotta group-hover:text-white transition-colors duration-500" />
                 </div>
-
-                {/* Text */}
                 <div className="flex-1">
                   <h3 className="text-xl lg:text-2xl font-heading text-earth mb-2 group-hover:text-terracotta transition-colors duration-300">
                     {s.title}
                   </h3>
                   <p className="text-warm-gray text-sm leading-relaxed max-w-2xl">{s.desc}</p>
                 </div>
-
-                {/* Arrow */}
                 <div className="hidden lg:flex w-10 h-10 rounded-full border border-earth/10 items-center justify-center group-hover:bg-terracotta group-hover:border-terracotta transition-all duration-500">
                   <ArrowUpRight size={16} className="text-earth/30 group-hover:text-white transition-colors duration-500" />
                 </div>
@@ -682,7 +841,7 @@ function Services() {
 }
 
 /* ═══════════════════════════════════════════
-   STATS + FOUNDER
+   STATS + FOUNDER — Split Screen with parallax
    ═══════════════════════════════════════════ */
 function StatsFounder() {
   const stats = [
@@ -692,52 +851,59 @@ function StatsFounder() {
     { value: 100, suffix: '%', label: 'Terre cuite naturelle' },
   ]
 
+  const imageRef = useRef<HTMLDivElement>(null)
+  const { scrollYProgress: imgScroll } = useScroll({ target: imageRef, offset: ['start end', 'end start'] })
+  const imgScale = useTransform(imgScroll, [0, 0.5, 1], [1.15, 1, 1.1])
+
   return (
     <section id="apropos" className="relative">
-      {/* Split: Image Left, Content Right */}
       <div className="grid lg:grid-cols-2 min-h-[600px]">
-        {/* Image Side */}
-        <FadeIn className="relative overflow-hidden">
-          <Image
-            src="/images/nb/about-team.jpg"
-            alt="Équipe Nature Brique"
-            fill
-            className="object-cover"
-            sizes="(max-width: 1024px) 100vw, 50vw"
-          />
+        {/* Image Side with scroll-linked scale */}
+        <div ref={imageRef} className="relative overflow-hidden">
+          <motion.div style={{ scale: imgScale }} className="absolute inset-0">
+            <Image
+              src="/images/nb/fab-production.jpg"
+              alt="Production Nature Brique"
+              fill
+              className="object-cover"
+              sizes="(max-width: 1024px) 100vw, 50vw"
+            />
+          </motion.div>
           <div className="absolute inset-0 grain-overlay-dark" />
           {/* Floating stat card */}
-          <div className="absolute bottom-6 left-6 right-6 sm:bottom-10 sm:left-10 sm:right-auto glass-card rounded-2xl p-6 z-[3]">
-            <p className="text-cream/60 text-xs font-semibold tracking-widest uppercase mb-2">Notre engagement</p>
-            <p className="text-cream text-lg font-heading leading-snug">
-              &laquo; Chaque brique que nous produisons porte la promesse d&apos;un avenir plus durable. &raquo;
-            </p>
-          </div>
-        </FadeIn>
+          <SlideIn direction="left" delay={0.3}>
+            <div className="absolute bottom-6 left-6 right-6 sm:bottom-10 sm:left-10 sm:right-auto glass-card rounded-2xl p-6 z-[3]">
+              <p className="text-cream/60 text-xs font-semibold tracking-widest uppercase mb-2">Notre engagement</p>
+              <p className="text-cream text-lg font-heading leading-snug">
+                &laquo; Chaque brique que nous produisons porte la promesse d&apos;un avenir plus durable. &raquo;
+              </p>
+            </div>
+          </SlideIn>
+        </div>
 
         {/* Content Side */}
         <div className="bg-earth grain-overlay-dark flex flex-col justify-center px-8 lg:px-16 py-16 lg:py-0">
-          <FadeIn>
+          <SlideIn direction="right">
             <span className="section-label">À propos</span>
-          </FadeIn>
-          <FadeIn delay={0.1}>
+          </SlideIn>
+          <TextReveal delay={0.1}>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-heading text-cream mt-4 mb-6 leading-tight">
               Pionniers de la<br />terre cuite au <span className="text-terracotta">Bénin</span>
             </h2>
-          </FadeIn>
-          <FadeIn delay={0.2}>
+          </TextReveal>
+          <SlideIn direction="right" delay={0.2}>
             <p className="text-cream/50 leading-relaxed mb-4">
               Fondée en 2011 par Franck Kidjo, Nature Brique est la première industrie céramique du Bénin. Nous transformons l&apos;argile locale en briques de qualité supérieure pour répondre aux défis de la construction durable en Afrique de l&apos;Ouest.
             </p>
-          </FadeIn>
-          <FadeIn delay={0.25}>
+          </SlideIn>
+          <SlideIn direction="right" delay={0.25}>
             <p className="text-cream/50 leading-relaxed mb-10">
               De notre siège social à Cotonou à notre usine de production à Zogbodomey, nous maîtrisons l&apos;intégralité de la chaîne de valeur : de l&apos;extraction de l&apos;argile à la cuisson, en passant par le moulage et le contrôle qualité.
             </p>
-          </FadeIn>
+          </SlideIn>
 
           {/* Stats Grid */}
-          <StaggerGroup className="grid grid-cols-2 gap-6 lg:gap-8" stagger={0.1}>
+          <StaggerGroup className="grid grid-cols-2 gap-6 lg:gap-8" stagger={0.12}>
             {stats.map((s) => (
               <motion.div key={s.label} variants={staggerItem} className="border-t border-cream/10 pt-4">
                 <div className="text-3xl lg:text-4xl text-terracotta mb-1">
@@ -757,18 +923,22 @@ function StatsFounder() {
    QUOTE / MISSION SECTION
    ═══════════════════════════════════════════ */
 function MissionSection() {
+  const sectionRef = useRef<HTMLDivElement>(null)
+  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ['start end', 'end start'] })
+  const quoteScale = useTransform(scrollYProgress, [0, 0.5, 1], [0.92, 1, 0.98])
+
   return (
-    <section className="relative py-20 lg:py-28 bg-cream grain-overlay overflow-hidden">
-      <div className="relative z-[3] max-w-4xl mx-auto px-6 lg:px-10 text-center">
+    <section ref={sectionRef} className="relative py-20 lg:py-28 bg-cream grain-overlay overflow-hidden">
+      <motion.div style={{ scale: quoteScale }} className="relative z-[3] max-w-4xl mx-auto px-6 lg:px-10 text-center">
         <FadeIn>
           <Quote size={48} className="text-terracotta/20 mx-auto mb-6" />
         </FadeIn>
-        <FadeIn delay={0.1}>
+        <TextReveal delay={0.15}>
           <blockquote className="text-2xl md:text-3xl lg:text-4xl font-heading text-earth leading-snug mb-8">
             La terre cuite n&apos;est pas un matériau du passé — c&apos;est le matériau de l&apos;avenir. Naturel, performant, intemporel.
           </blockquote>
-        </FadeIn>
-        <FadeIn delay={0.2}>
+        </TextReveal>
+        <FadeIn delay={0.3}>
           <div className="flex items-center justify-center gap-3">
             <div className="w-10 h-10 rounded-full bg-terracotta/10 flex items-center justify-center">
               <Award size={18} className="text-terracotta" />
@@ -779,37 +949,43 @@ function MissionSection() {
             </div>
           </div>
         </FadeIn>
-      </div>
+      </motion.div>
     </section>
   )
 }
 
 /* ═══════════════════════════════════════════
-   CTA SECTION
+   CTA SECTION — with parallax bg
    ═══════════════════════════════════════════ */
 function CtaSection() {
+  const bgRef = useRef<HTMLDivElement>(null)
+  const { scrollYProgress: bgScroll } = useScroll({ target: bgRef, offset: ['start end', 'end start'] })
+  const bgY = useTransform(bgScroll, [0, 1], [80, -80])
+
   return (
-    <section id="contact" className="relative py-24 lg:py-32 overflow-hidden">
-      {/* Background */}
-      <Image src="/images/nb/work-site2.jpg" alt="Chantier Nature Brique" fill className="object-cover" />
+    <section id="contact" ref={bgRef} className="relative py-24 lg:py-32 overflow-hidden">
+      {/* Background with parallax */}
+      <motion.div className="absolute inset-0" style={{ y: bgY }}>
+        <Image src="/images/nb/work-site3.jpg" alt="Chantier Nature Brique" fill className="object-cover scale-110" />
+      </motion.div>
       <div className="absolute inset-0 bg-earth/85" />
       <div className="absolute inset-0 grain-overlay-dark" />
 
       <div className="relative z-[3] max-w-3xl mx-auto px-6 lg:px-10 text-center">
         <FadeIn>
-          <span className="section-label !text-terracotta-light">Passons à l'action</span>
+          <span className="section-label !text-terracotta-light">Passons à l&apos;action</span>
         </FadeIn>
-        <FadeIn delay={0.1}>
+        <TextReveal delay={0.1}>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-heading text-cream mt-4 mb-6 leading-tight">
             Votre projet en terre cuite<br />commence <span className="text-terracotta-light">ici</span>
           </h2>
-        </FadeIn>
-        <FadeIn delay={0.2}>
+        </TextReveal>
+        <FadeIn delay={0.25}>
           <p className="text-cream/50 text-base leading-relaxed mb-10 max-w-xl mx-auto">
             Contactez notre équipe pour discuter de votre projet. Devis gratuit, conseil personnalisé et accompagnement de A à Z.
           </p>
         </FadeIn>
-        <FadeIn delay={0.3}>
+        <FadeIn delay={0.35}>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a href="tel:+22996505057" className="btn-premium bg-terracotta text-white px-8 py-4 rounded-full font-semibold text-sm tracking-wide flex items-center justify-center gap-2">
               <Phone size={16} />
@@ -920,72 +1096,6 @@ function Footer() {
         </div>
       </div>
     </footer>
-  )
-}
-
-/* ═══════════════════════════════════════════
-   PHOTO MOSAIC STRIP
-   ═══════════════════════════════════════════ */
-const MOSAIC_IMGS = [
-  { src: '/images/nb/facade3.jpg', span: 'row-span-2' },
-  { src: '/images/nb/brick-detail2.jpg', span: '' },
-  { src: '/images/nb/work-site3.jpg', span: '' },
-  { src: '/images/nb/ext-3.jpg', span: 'col-span-2' },
-  { src: '/images/nb/facade4.jpg', span: '' },
-]
-
-function PhotoMosaic() {
-  return (
-    <section className="relative py-2 lg:py-4 bg-earth-dark">
-      <div className="max-w-7xl mx-auto px-4 lg:px-10 grid grid-cols-2 md:grid-cols-4 gap-1.5 lg:gap-2 auto-rows-[120px] md:auto-rows-[160px] lg:auto-rows-[200px]">
-        {MOSAIC_IMGS.map((img, i) => (
-          <FadeIn key={img.src} delay={i * 0.06} className={`img-reveal rounded-lg overflow-hidden ${img.span}`}>
-            <Image src={img.src} alt="" fill className="object-cover grayscale-[20%] hover:grayscale-0 transition-all duration-700 hover:scale-105" sizes="400px" />
-          </FadeIn>
-        ))}
-      </div>
-    </section>
-  )
-}
-
-/* ═══════════════════════════════════════════
-   PROCESS SECTION — How we work
-   ═══════════════════════════════════════════ */
-const PROCESS_STEPS = [
-  { num: '01', title: 'Consultation', desc: 'Échange avec notre équipe pour comprendre vos besoins, votre budget et vos contraintes.' },
-  { num: '02', title: 'Conception', desc: 'Étude technique et recommandations sur les solutions les plus adaptées à votre projet.' },
-  { num: '03', title: 'Production', desc: 'Fabrication de vos briques dans notre usine à Zogbodomey avec contrôle qualité rigoureux.' },
-  { num: '04', title: 'Réalisation', desc: 'Pose professionnelle par notre pôle construction avec garantie décennale sur tous nos ouvrages.' },
-]
-
-function ProcessSection() {
-  return (
-    <section className="relative py-20 lg:py-28 bg-cream grain-overlay overflow-hidden">
-      <div className="relative z-[3] max-w-7xl mx-auto px-6 lg:px-10">
-        <div className="text-center mb-16">
-          <FadeIn>
-            <span className="section-label justify-center">Notre Processus</span>
-          </FadeIn>
-          <FadeIn delay={0.1}>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-heading text-earth mt-4 leading-tight">
-              De l&apos;idée à la <span className="text-terracotta">réalité</span>
-            </h2>
-          </FadeIn>
-        </div>
-
-        <StaggerGroup className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8" stagger={0.12}>
-          {PROCESS_STEPS.map((step) => (
-            <motion.div key={step.num} variants={staggerItem} className="relative group">
-              {/* Connector line */}
-              <div className="hidden lg:block absolute top-8 left-[calc(50%+2rem)] right-[-calc(50%+2rem)] w-[calc(100%-4rem)] h-px bg-earth/8 -translate-x-0" />
-              <span className="text-5xl lg:text-6xl font-heading text-earth/[0.06] group-hover:text-terracotta/20 transition-colors duration-500">{step.num}</span>
-              <h3 className="text-xl font-heading text-earth mt-2 mb-3 group-hover:text-terracotta transition-colors duration-300">{step.title}</h3>
-              <p className="text-warm-gray text-sm leading-relaxed">{step.desc}</p>
-            </motion.div>
-          ))}
-        </StaggerGroup>
-      </div>
-    </section>
   )
 }
 

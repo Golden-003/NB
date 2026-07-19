@@ -1,0 +1,1013 @@
+     1→     1→'use client'
+     2→     2→
+     3→     3→import { useState, useEffect, useRef, useCallback } from 'react'
+     4→     4→import Image from 'next/image'
+     5→     5→import { motion, useInView, useScroll, useTransform, AnimatePresence } from 'framer-motion'
+     6→     6→import {
+     7→     7→  Thermometer,
+     8→     8→  Volume2,
+     9→     9→  Flame,
+    10→    10→  Zap,
+    11→    11→  Shield,
+    12→    12→  Leaf,
+    13→    13→  Phone,
+    14→    14→  Mail,
+    15→    15→  MapPin,
+    16→    16→  ChevronRight,
+    17→    17→  Menu,
+    18→    18→  X,
+    19→    19→  ArrowUpRight,
+    20→    20→  Quote,
+    21→    21→  Facebook,
+    22→    22→  Instagram,
+    23→    23→  MessageCircle,
+    24→    24→  Clock,
+    25→    25→  Building2,
+    26→    26→  Award,
+    27→    27→  Lightbulb,
+    28→    28→  GraduationCap,
+    29→    29→  HardHat,
+    30→    30→} from 'lucide-react'
+    31→    31→
+    32→    32→/* ═══════════════════════════════════════════
+    33→    33→   ANIMATION PRIMITIVES
+    34→    34→   ═══════════════════════════════════════════ */
+    35→    35→const ease = [0.22, 1, 0.36, 1] as const
+    36→    36→
+    37→    37→function FadeIn({ children, delay = 0, y = 20, className = '' }: { children: React.ReactNode; delay?: number; y?: number; className?: string }) {
+    38→    38→  const ref = useRef<HTMLDivElement>(null)
+    39→    39→  const inView = useInView(ref, { once: true, margin: '-80px' })
+    40→    40→  return (
+    41→    41→    <motion.div
+    42→    42→      ref={ref}
+    43→    43→      initial={{ opacity: 0, y }}
+    44→    44→      animate={inView ? { opacity: 1, y: 0 } : {}}
+    45→    45→      transition={{ duration: 0.9, delay, ease: [0.25, 0.1, 0.25, 1] }}
+    46→    46→      className={className}
+    47→    47→    >
+    48→    48→      {children}
+    49→    49→    </motion.div>
+    50→    50→  )
+    51→    51→}
+    52→    52→
+    53→    53→function StaggerGroup({ children, className = '', stagger = 0.08 }: { children: React.ReactNode; className?: string; stagger?: number }) {
+    54→    54→  const ref = useRef<HTMLDivElement>(null)
+    55→    55→  const inView = useInView(ref, { once: true, margin: '-60px' })
+    56→    56→  return (
+    57→    57→    <motion.div
+    58→    58→      ref={ref}
+    59→    59→      initial="hidden"
+    60→    60→      animate={inView ? 'show' : 'hidden'}
+    61→    61→      variants={{ hidden: {}, show: { transition: { staggerChildren: stagger } } }}
+    62→    62→      className={className}
+    63→    63→    >
+    64→    64→      {children}
+    65→    65→    </motion.div>
+    66→    66→  )
+    67→    67→}
+    68→    68→
+    69→    69→const staggerItem = {
+    70→    70→  hidden: { opacity: 0, y: 18 },
+    71→    71→  show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.25, 0.1, 0.25, 1] } },
+    72→    72→}
+    73→    73→
+    74→    74→/* ═══════════════════════════════════════════
+    75→    75→   ANIMATED COUNTER
+    76→    76→   ═══════════════════════════════════════════ */
+    77→    77→function Counter({ end, suffix = '', prefix = '' }: { end: number; suffix?: string; prefix?: string }) {
+    78→    78→  const [count, setCount] = useState(0)
+    79→    79→  const ref = useRef<HTMLSpanElement>(null)
+    80→    80→  const inView = useInView(ref, { once: true })
+    81→    81→  useEffect(() => {
+    82→    82→    if (!inView) return
+    83→    83→    let start = 0
+    84→    84→    const duration = 2000
+    85→    85→    const step = end / (duration / 16)
+    86→    86→    const timer = setInterval(() => {
+    87→    87→      start += step
+    88→    88→      if (start >= end) { setCount(end); clearInterval(timer) }
+    89→    89→      else setCount(Math.floor(start))
+    90→    90→    }, 16)
+    91→    91→    return () => clearInterval(timer)
+    92→    92→  }, [inView, end])
+    93→    93→  return <span ref={ref} className="stat-number">{prefix}{count}{suffix}</span>
+    94→    94→}
+    95→    95→
+    96→    96→/* ═══════════════════════════════════════════
+    97→    97→   NAVIGATION
+    98→    98→   ═══════════════════════════════════════════ */
+    99→    99→const NAV_LINKS = [
+   100→   100→  { label: 'Avantages', href: '#avantages' },
+   101→   101→  { label: 'Solutions', href: '#solutions' },
+   102→   102→  { label: 'Réalisations', href: '#travaux' },
+   103→   103→  { label: 'Services', href: '#services' },
+   104→   104→  { label: 'À propos', href: '#apropos' },
+   105→   105→  { label: 'Contact', href: '#contact' },
+   106→   106→]
+   107→   107→
+   108→   108→function Navigation() {
+   109→   109→  const [scrolled, setScrolled] = useState(false)
+   110→   110→  const [mobileOpen, setMobileOpen] = useState(false)
+   111→   111→
+   112→   112→  useEffect(() => {
+   113→   113→    const handler = () => setScrolled(window.scrollY > 80)
+   114→   114→    window.addEventListener('scroll', handler, { passive: true })
+   115→   115→    return () => window.removeEventListener('scroll', handler)
+   116→   116→  }, [])
+   117→   117→
+   118→   118→  return (
+   119→   119→    <>
+   120→   120→      {/* Scroll Progress */}
+   121→   121→      <ScrollProgress />
+   122→   122→
+   123→   123→      <motion.nav
+   124→   124→        initial={{ y: -100 }}
+   125→   125→        animate={{ y: 0 }}
+   126→   126→        transition={{ duration: 0.8, ease }}
+   127→   127→        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? 'nav-scrolled' : 'bg-transparent'}`}
+   128→   128→      >
+   129→   129→        <div className="max-w-7xl mx-auto px-6 lg:px-10 flex items-center justify-between h-20">
+   130→   130→          {/* Logo */}
+   131→   131→          <a href="#accueil" className="relative z-50">
+   132→   132→            <Image src="/images/logo.png" alt="Nature Brique" width={160} height={40} className="h-9 w-auto" priority />
+   133→   133→          </a>
+   134→   134→
+   135→   135→          {/* Desktop Links */}
+   136→   136→          <div className="hidden lg:flex items-center gap-1">
+   137→   137→            {NAV_LINKS.map((link) => (
+   138→   138→              <a
+   139→   139→                key={link.href}
+   140→   140→                href={link.href}
+   141→   141→                className={`px-4 py-2 text-sm font-semibold tracking-wide rounded-full transition-all duration-300 ${
+   142→   142→                  scrolled
+   143→   143→                    ? 'text-earth hover:text-terracotta hover:bg-terracotta/5'
+   144→   144→                    : 'text-white/90 hover:text-white hover:bg-white/10'
+   145→   145→                }`}
+   146→   146→              >
+   147→   147→                {link.label}
+   148→   148→              </a>
+   149→   149→            ))}
+   150→   150→          </div>
+   151→   151→
+   152→   152→          {/* CTA Desktop */}
+   153→   153→          <a
+   154→   154→            href="tel:+22996505057"
+   155→   155→            className="hidden lg:flex items-center gap-2 btn-premium bg-terracotta text-white px-5 py-2.5 rounded-full text-sm font-semibold tracking-wide"
+   156→   156→          >
+   157→   157→            <Phone size={15} />
+   158→   158→            Nous contacter
+   159→   159→          </a>
+   160→   160→
+   161→   161→          {/* Mobile Toggle */}
+   162→   162→          <button
+   163→   163→            onClick={() => setMobileOpen(!mobileOpen)}
+   164→   164→            className="lg:hidden relative z-50 p-2"
+   165→   165→            aria-label="Menu"
+   166→   166→          >
+   167→   167→            {mobileOpen ? (
+   168→   168→              <X size={24} className={scrolled ? 'text-earth' : 'text-white'} />
+   169→   169→            ) : (
+   170→   170→              <Menu size={24} className={scrolled ? 'text-earth' : 'text-white'} />
+   171→   171→            )}
+   172→   172→          </button>
+   173→   173→        </div>
+   174→   174→      </motion.nav>
+   175→   175→
+   176→   176→      {/* Mobile Menu */}
+   177→   177→      <AnimatePresence>
+   178→   178→        {mobileOpen && (
+   179→   179→          <motion.div
+   180→   180→            initial={{ opacity: 0 }}
+   181→   181→            animate={{ opacity: 1 }}
+   182→   182→            exit={{ opacity: 0 }}
+   183→   183→            className="fixed inset-0 z-40 bg-earth/98 flex flex-col items-center justify-center gap-6"
+   184→   184→          >
+   185→   185→            {NAV_LINKS.map((link, i) => (
+   186→   186→              <motion.a
+   187→   187→                key={link.href}
+   188→   188→                href={link.href}
+   189→   189→                onClick={() => setMobileOpen(false)}
+   190→   190→                initial={{ opacity: 0, y: 20 }}
+   191→   191→                animate={{ opacity: 1, y: 0 }}
+   192→   192→                transition={{ delay: 0.1 + i * 0.06, duration: 0.4, ease }}
+   193→   193→                className="text-cream text-2xl font-heading tracking-wide hover:text-terracotta transition-colors"
+   194→   194→              >
+   195→   195→                {link.label}
+   196→   196→              </motion.a>
+   197→   197→            ))}
+   198→   198→            <motion.a
+   199→   199→              href="tel:+22996505057"
+   200→   200→              initial={{ opacity: 0, y: 20 }}
+   201→   201→              animate={{ opacity: 1, y: 0 }}
+   202→   202→              transition={{ delay: 0.5, duration: 0.4, ease }}
+   203→   203→              className="mt-4 btn-premium bg-terracotta text-white px-8 py-3 rounded-full font-semibold"
+   204→   204→            >
+   205→   205→              <Phone size={16} className="inline mr-2" />
+   206→   206→              +229 96 50 50 57
+   207→   207→            </motion.a>
+   208→   208→          </motion.div>
+   209→   209→        )}
+   210→   210→      </AnimatePresence>
+   211→   211→    </>
+   212→   212→  )
+   213→   213→}
+   214→   214→
+   215→   215→/* ═══════════════════════════════════════════
+   216→   216→   SCROLL PROGRESS BAR
+   217→   217→   ═══════════════════════════════════════════ */
+   218→   218→function ScrollProgress() {
+   219→   219→  const { scrollYProgress } = useScroll()
+   220→   220→  const scaleX = useTransform(scrollYProgress, [0, 1], [0, 1])
+   221→   221→  return <motion.div className="scroll-progress" style={{ scaleX }} />
+   222→   222→}
+   223→   223→
+   224→   224→/* ═══════════════════════════════════════════
+   225→   225→   HERO SECTION — Cinematic
+   226→   226→   ═══════════════════════════════════════════ */
+   227→   227→function Hero() {
+   228→   228→  const { scrollY } = useScroll()
+   229→   229→  const bgY = useTransform(scrollY, [0, 600], [0, 150])
+   230→   230→  const opacity = useTransform(scrollY, [0, 500], [1, 0])
+   231→   231→
+   232→   232→  return (
+   233→   233→    <section id="accueil" className="relative h-screen min-h-[700px] overflow-hidden">
+   234→   234→      {/* Background Image with Parallax */}
+   235→   235→      <motion.div className="absolute inset-0 will-change-transform" style={{ y: bgY }}>
+   236→   236→        <Image
+   237→   237→          src="/images/nb/hero-construction.jpg"
+   238→   238→          alt="Chantier Nature Brique"
+   239→   239→          fill
+   240→   240→          className="object-cover scale-110"
+   241→   241→          priority
+   242→   242→          quality={85}
+   243→   243→        />
+   244→   244→      </motion.div>
+   245→   245→
+   246→   246→      {/* Gradient Overlay */}
+   247→   247→      <div className="absolute inset-0 bg-gradient-to-b from-earth/70 via-earth/40 to-earth/80 z-[1]" />
+   248→   248→
+   249→   249→      {/* Grain */}
+   250→   250→      <div className="absolute inset-0 grain-overlay-dark z-[2]" />
+   251→   251→
+   252→   252→      {/* Bottom curve transition */}
+   253→   253→      <div className="absolute bottom-0 left-0 right-0 z-[3]">
+   254→   254→        <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full">
+   255→   255→          <path d="M0 80L48 74.7C96 69 192 59 288 53.3C384 48 480 48 576 53.3C672 59 768 69 864 69.3C960 69 1056 59 1152 53.3C1248 48 1344 48 1392 48L1440 48V80H0Z" fill="#2D1B0E"/>
+   256→   256→        </svg>
+   257→   257→      </div>
+   258→   258→
+   259→   259→      {/* Content */}
+   260→   260→      <motion.div
+   261→   261→        style={{ opacity }}
+   262→   262→        className="relative z-[3] flex flex-col justify-end h-full max-w-7xl mx-auto px-6 lg:px-10 pb-24 lg:pb-32"
+   263→   263→      >
+   264→   264→        <div className="max-w-3xl">
+   265→   265→          <motion.div
+   266→   266→            initial={{ opacity: 0, x: -20 }}
+   267→   267→            animate={{ opacity: 1, x: 0 }}
+   268→   268→            transition={{ duration: 0.8, delay: 0.3, ease }}
+   269→   269→            className="section-label !text-terracotta-light mb-6"
+   270→   270→          >
+   271→   271→            Depuis 2011 au Bénin
+   272→   272→          </motion.div>
+   273→   273→
+   274→   274→          <motion.h1
+   275→   275→            initial={{ opacity: 0, y: 40 }}
+   276→   276→            animate={{ opacity: 1, y: 0 }}
+   277→   277→            transition={{ duration: 1, delay: 0.5, ease }}
+   278→   278→            className="text-cream text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-heading leading-[1.05] mb-6"
+   279→   279→          >
+   280→   280→            Construisons<br />
+   281→   281→            notre monde<br />
+   282→   282→            <span className="text-terracotta-light">écologique</span>
+   283→   283→          </motion.h1>
+   284→   284→
+   285→   285→          <motion.p
+   286→   286→            initial={{ opacity: 0, y: 30 }}
+   287→   287→            animate={{ opacity: 1, y: 0 }}
+   288→   288→            transition={{ duration: 0.8, delay: 0.8, ease }}
+   289→   289→            className="text-cream/70 text-lg md:text-xl max-w-xl mb-10 leading-relaxed"
+   290→   290→          >
+   291→   291→            Première industrie céramique du Bénin. Des briques en terre cuite pour un habitat durable, confortable et authentique.
+   292→   292→          </motion.p>
+   293→   293→
+   294→   294→          <motion.div
+   295→   295→            initial={{ opacity: 0, y: 20 }}
+   296→   296→            animate={{ opacity: 1, y: 0 }}
+   297→   297→            transition={{ duration: 0.7, delay: 1.1, ease }}
+   298→   298→            className="flex flex-wrap gap-4"
+   299→   299→          >
+   300→   300→            <a href="#solutions" className="btn-premium bg-terracotta text-white px-8 py-4 rounded-full font-semibold text-sm tracking-wide flex items-center gap-2">
+   301→   301→              Découvrir nos solutions
+   302→   302→              <ChevronRight size={18} />
+   303→   303→            </a>
+   304→   304→            <a href="#travaux" className="btn-premium bg-white/10 backdrop-blur-sm text-white border border-white/20 px-8 py-4 rounded-full font-semibold text-sm tracking-wide hover:bg-white/20">
+   305→   305→              Voir nos réalisations
+   306→   306→            </a>
+   307→   307→          </motion.div>
+   308→   308→        </div>
+   309→   309→      </motion.div>
+   310→   310→
+   311→   311→      {/* Scroll indicator */}
+   312→   312→      <motion.div
+   313→   313→        initial={{ opacity: 0 }}
+   314→   314→        animate={{ opacity: 1 }}
+   315→   315→        transition={{ delay: 1.5, duration: 1 }}
+   316→   316→        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-[3] flex flex-col items-center gap-2"
+   317→   317→      >
+   318→   318→        <span className="text-cream/40 text-xs tracking-widest uppercase">Scroll</span>
+   319→   319→        <motion.div
+   320→   320→          animate={{ y: [0, 8, 0] }}
+   321→   321→          transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+   322→   322→          className="w-5 h-8 rounded-full border-2 border-cream/30 flex items-start justify-center pt-1.5"
+   323→   323→        >
+   324→   324→          <div className="w-1 h-1.5 rounded-full bg-cream/60" />
+   325→   325→        </motion.div>
+   326→   326→      </motion.div>
+   327→   327→    </section>
+   328→   328→  )
+   329→   329→}
+   330→   330→
+   331→   331→/* ═══════════════════════════════════════════
+   332→   332→   MARQUEE TRUST BAR
+   333→   333→   ═══════════════════════════════════════════ */
+   334→   334→function TrustBar() {
+   335→   335→  const items = [
+   336→   336→    'Première industrie céramique du Bénin',
+   337→   337→    'Fondée en 2011 par Franck Kidjo',
+   338→   338→    'Certifié Eco-Build',
+   339→   339→    '25+ employés',
+   340→   340→    'Usine à Zogbodomey',
+   341→   341→    'Siège à Cotonou',
+   342→   342→  ]
+   343→   343→  return (
+   344→   344→    <div className="bg-earth py-4 overflow-hidden">
+   345→   345→      <div className="animate-marquee flex whitespace-nowrap">
+   346→   346→        {[...items, ...items].map((item, i) => (
+   347→   347→          <span key={i} className="mx-8 text-cream/40 text-xs font-semibold tracking-[0.2em] uppercase flex items-center gap-8">
+   348→   348→            {item}
+   349→   349→            <span className="text-terracotta/40">&#9670;</span>
+   350→   350→          </span>
+   351→   351→        ))}
+   352→   352→      </div>
+   353→   353→    </div>
+   354→   354→  )
+   355→   355→}
+   356→   356→
+   357→   357→/* ═══════════════════════════════════════════
+   358→   358→   AVANTAGES — Bento Grid
+   359→   359→   ═══════════════════════════════════════════ */
+   360→   360→const AVANTAGES = [
+   361→   361→  { icon: Thermometer, title: 'Confort Thermique', desc: 'Régulation naturelle de la température. Jusqu\'à 8°C de différence avec le béton.', span: 'md:col-span-2' },
+   362→   362→  { icon: Volume2, title: 'Isolation Acoustique', desc: 'Structure poreuse absorbant les bruits pour un cadre de vie paisible.', span: '' },
+   363→   363→  { icon: Flame, title: 'Résistance au Feu', desc: 'Incombustible par nature, la terre cuite protège votre famille.', span: '' },
+   364→   364→  { icon: Leaf, title: 'Écologique', desc: 'Matériau 100% naturel, recyclable, faible empreinte carbone.', span: '' },
+   365→   365→  { icon: Zap, title: 'Performance Énergétique', desc: 'Réduit la dépendance à la climatisation jusqu\'à 40%.', span: 'md:col-span-2' },
+   366→   366→]
+   367→   367→
+   368→   368→function Avantages() {
+   369→   369→  return (
+   370→   370→    <section id="avantages" className="relative py-24 lg:py-32 bg-cream grain-overlay overflow-hidden">
+   371→   371→      <div className="relative z-[3] max-w-7xl mx-auto px-6 lg:px-10">
+   372→   372→        {/* Section Header — Asymmetric */}
+   373→   373→        <div className="grid lg:grid-cols-12 gap-8 lg:gap-16 mb-16 lg:mb-20">
+   374→   374→          <div className="lg:col-span-7">
+   375→   375→            <FadeIn>
+   376→   376→              <span className="section-label">Pourquoi la terre cuite</span>
+   377→   377→            </FadeIn>
+   378→   378→            <FadeIn delay={0.1}>
+   379→   379→              <h2 className="text-3xl md:text-4xl lg:text-5xl font-heading text-earth mt-4 leading-tight">
+   380→   380→                Un matériau d&apos;exception<br />pour un habitat <span className="text-terracotta">durable</span>
+   381→   381→              </h2>
+   382→   382→            </FadeIn>
+   383→   383→          </div>
+   384→   384→          <div className="lg:col-span-5 flex items-end">
+   385→   385→            <FadeIn delay={0.2}>
+   386→   386→              <p className="text-warm-gray text-base leading-relaxed">
+   387→   387→                La brique en terre cuite allie performance technique, confort au quotidien et respect de l&apos;environnement. Un choix responsable pour les générations futures.
+   388→   388→              </p>
+   389→   389→            </FadeIn>
+   390→   390→          </div>
+   391→   391→        </div>
+   392→   392→
+   393→   393→        {/* Bento Grid */}
+   394→   394→        <StaggerGroup className="grid md:grid-cols-3 gap-4 lg:gap-5" stagger={0.08}>
+   395→   395→          {AVANTAGES.map((item) => (
+   396→   396→            <motion.div key={item.title} variants={staggerItem} className={`bento-card ${item.span} bg-white rounded-2xl p-8 lg:p-10 relative group`}>
+   397→   397→              <div className="w-12 h-12 rounded-xl bg-terracotta/8 flex items-center justify-center mb-6 group-hover:bg-terracotta group-hover:scale-110 transition-all duration-500">
+   398→   398→                <item.icon size={22} className="text-terracotta group-hover:text-white transition-colors duration-500" />
+   399→   399→              </div>
+   400→   400→              <h3 className="text-xl font-heading text-earth mb-3">{item.title}</h3>
+   401→   401→              <p className="text-warm-gray text-sm leading-relaxed">{item.desc}</p>
+   402→   402→            </motion.div>
+   403→   403→          ))}
+   404→   404→        </StaggerGroup>
+   405→   405→      </div>
+   406→   406→    </section>
+   407→   407→  )
+   408→   408→}
+   409→   409→
+   410→   410→/* ═══════════════════════════════════════════
+   411→   411→   NOS SOLUTIONS — Horizontal Scroll
+   412→   412→   ═══════════════════════════════════════════ */
+   413→   413→const SOLUTIONS = [
+   414→   414→  {
+   415→   415→    title: 'Briques Porteuses',
+   416→   416→    desc: 'Briques structurelles pour murs porteurs. Résistance mécanique exceptionnelle et isolation thermique intégrée.',
+   417→   417→    img: '/images/nb/brick-wall.jpg',
+   418→   418→    tag: 'Structure',
+   419→   419→  },
+   420→   420→  {
+   421→   421→    title: 'Briques de Parement',
+   422→   422→    desc: 'Finition décorative pour façades authentiques. Chaque brique offre une texture unique et naturelle.',
+   423→   423→    img: '/images/nb/facade.jpg',
+   424→   424→    tag: 'Esthétique',
+   425→   425→  },
+   426→   426→  {
+   427→   427→    title: 'Pavés en Terre Cuite',
+   428→   428→    desc: 'Aménagement extérieur élégant et durable. Allées, terrasses et espaces publics.',
+   429→   429→    img: '/images/nb/paves-straat.jpg',
+   430→   430→    tag: 'Extérieur',
+   431→   431→  },
+   432→   432→  {
+   433→   433→    title: 'Eco-Build',
+   434→   434→    desc: 'Notre certification engagement pour une construction responsable et écologique au Bénin.',
+   435→   435→    img: '/images/nb/ecobuild.jpg',
+   436→   436→    tag: 'Engagement',
+   437→   437→  },
+   438→   438→]
+   439→   439→
+   440→   440→function Solutions() {
+   441→   441→  const scrollRef = useRef<HTMLDivElement>(null)
+   442→   442→  const [isDown, setIsDown] = useState(false)
+   443→   443→  const [startX, setStartX] = useState(0)
+   444→   444→  const [scrollLeft, setScrollLeft] = useState(0)
+   445→   445→
+   446→   446→  const onMouseDown = useCallback((e: React.MouseEvent) => {
+   447→   447→    if (!scrollRef.current) return
+   448→   448→    setIsDown(true)
+   449→   449→    setStartX(e.pageX - scrollRef.current.offsetLeft)
+   450→   450→    setScrollLeft(scrollRef.current.scrollLeft)
+   451→   451→  }, [])
+   452→   452→
+   453→   453→  const onMouseLeave = useCallback(() => setIsDown(false), [])
+   454→   454→  const onMouseUp = useCallback(() => setIsDown(false), [])
+   455→   455→
+   456→   456→  const onMouseMove = useCallback((e: React.MouseEvent) => {
+   457→   457→    if (!isDown || !scrollRef.current) return
+   458→   458→    e.preventDefault()
+   459→   459→    const x = e.pageX - scrollRef.current.offsetLeft
+   460→   460→    const walk = (x - startX) * 1.5
+   461→   461→    scrollRef.current.scrollLeft = scrollLeft - walk
+   462→   462→  }, [isDown, startX, scrollLeft])
+   463→   463→
+   464→   464→  return (
+   465→   465→    <section id="solutions" className="relative py-24 lg:py-32 bg-earth grain-overlay-dark overflow-hidden">
+   466→   466→      <div className="relative z-[3] max-w-7xl mx-auto px-6 lg:px-10">
+   467→   467→        <FadeIn>
+   468→   468→          <span className="section-label">Nos Solutions</span>
+   469→   469→        </FadeIn>
+   470→   470→        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between mt-4 mb-12 lg:mb-16">
+   471→   471→          <FadeIn delay={0.1}>
+   472→   472→            <h2 className="text-3xl md:text-4xl lg:text-5xl font-heading text-cream leading-tight">
+   473→   473→              Des produits pour<br />chaque <span className="text-terracotta">projet</span>
+   474→   474→            </h2>
+   475→   475→          </FadeIn>
+   476→   476→          <FadeIn delay={0.2}>
+   477→   477→            <div className="hidden lg:flex gap-3 mt-6 lg:mt-0">
+   478→   478→              <button onClick={() => scrollRef.current?.scrollBy({ left: -400, behavior: 'smooth' })} className="w-12 h-12 rounded-full border border-cream/20 flex items-center justify-center text-cream/60 hover:text-cream hover:border-cream/40 transition-all">
+   479→   479→                <ChevronRight size={18} className="rotate-180" />
+   480→   480→              </button>
+   481→   481→              <button onClick={() => scrollRef.current?.scrollBy({ left: 400, behavior: 'smooth' })} className="w-12 h-12 rounded-full border border-cream/20 flex items-center justify-center text-cream/60 hover:text-cream hover:border-cream/40 transition-all">
+   482→   482→                <ChevronRight size={18} />
+   483→   483→              </button>
+   484→   484→            </div>
+   485→   485→          </FadeIn>
+   486→   486→        </div>
+   487→   487→      </div>
+   488→   488→
+   489→   489→      {/* Horizontal Scroll Cards — drag + snap */}
+   490→   490→      <div
+   491→   491→        ref={scrollRef}
+   492→   492→        className="scroll-container flex gap-5 lg:gap-6 overflow-x-auto px-6 lg:px-10 pb-4 snap-x select-none cursor-grab active:cursor-grabbing"
+   493→   493→        onMouseDown={onMouseDown}
+   494→   494→        onMouseLeave={onMouseLeave}
+   495→   495→        onMouseUp={onMouseUp}
+   496→   496→        onMouseMove={onMouseMove}
+   497→   497→      >
+   498→   498→        {SOLUTIONS.map((s, i) => (
+   499→   499→          <FadeIn key={s.title} delay={i * 0.1}>
+   500→   500→            <div className="flex-shrink-0 w-[300px] sm:w-[340px] lg:w-[380px] snap-start group">
+   501→   501→              <div className="img-reveal relative rounded-2xl overflow-hidden aspect-[4/5] bg-earth-light/30 mb-5">
+   502→   502→                <Image src={s.img} alt={s.title} fill className="object-cover" sizes="380px" />
+   503→   503→                <div className="absolute inset-0 bg-gradient-to-t from-earth/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+   504→   504→                <div className="absolute top-4 left-4">
+   505→   505→                  <span className="inline-block px-3 py-1 rounded-full text-[0.65rem] font-semibold tracking-widest uppercase bg-terracotta/90 text-white backdrop-blur-sm">
+   506→   506→                    {s.tag}
+   507→   507→                  </span>
+   508→   508→                </div>
+   509→   509→                <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-500">
+   510→   510→                  <span className="text-white text-sm font-semibold flex items-center gap-1">
+   511→   511→                    En savoir plus <ArrowUpRight size={14} />
+   512→   512→                  </span>
+   513→   513→                </div>
+   514→   514→              </div>
+   515→   515→              <h3 className="text-xl font-heading text-cream mb-2">{s.title}</h3>
+   516→   516→              <p className="text-cream/50 text-sm leading-relaxed">{s.desc}</p>
+   517→   517→            </div>
+   518→   518→          </FadeIn>
+   519→   519→        ))}
+   520→   520→      </div>
+   521→   521→    </section>
+   522→   522→  )
+   523→   523→}
+   524→   524→
+   525→   525→/* ═══════════════════════════════════════════
+   526→   526→   NOS TRAVAUX — Asymmetric Showcase
+   527→   527→   ═══════════════════════════════════════════ */
+   528→   528→const PROJETS = [
+   529→   529→  {
+   530→   530→    title: 'Résidence Éco-Habitat',
+   531→   531→    location: 'Cotonou, Bénin',
+   532→   532→    desc: 'Maison individuelle en brique porteuse avec façade en terre cuite apparente. Confort thermique optimal sans climatisation.',
+   533→   533→    img: '/images/nb/project-maison.jpg',
+   534→   534→    large: true,
+   535→   535→  },
+   536→   536→  {
+   537→   537→    title: 'Mur de Clôture Premium',
+   538→   538→    location: 'Zogbodomey, Bénin',
+   539→   539→    desc: 'Clôture en brique de parement alliant sécurité et esthétique pour un domaine résidentiel.',
+   540→   540→    img: '/images/nb/project-mur.jpg',
+   541→   541→    large: false,
+   542→   542→  },
+   543→   543→  {
+   544→   544→    title: 'Complexe Résidentiel',
+   545→   545→    location: 'Cotonou, Bénin',
+   546→   546→    desc: 'Ensemble de 4 villas construites entièrement en briques Nature Brique. Projet pilote Eco-Build.',
+   547→   547→    img: '/images/nb/ext-1.jpg',
+   548→   548→    large: false,
+   549→   549→  },
+   550→   550→]
+   551→   551→
+   552→   552→function Travaux() {
+   553→   553→  const { scrollYProgress } = useScroll({ target: useRef(null), offset: ['start end', 'end start'] })
+   554→   554→  const bgY = useTransform(scrollYProgress, [0, 1], [60, -60])
+   555→   555→
+   556→   556→  return (
+   557→   557→    <section id="travaux" className="relative py-24 lg:py-32 bg-cream grain-overlay overflow-hidden">
+   558→   558→      {/* Subtle parallax background accent */}
+   559→   559→      <motion.div
+   560→   560→        className="absolute top-0 right-0 w-1/2 h-full bg-terracotta/[0.03] -skew-x-12 -mr-20 pointer-events-none"
+   561→   561→        style={{ y: bgY }}
+   562→   562→      />
+   563→   563→      <div className="relative z-[3] max-w-7xl mx-auto px-6 lg:px-10">
+   564→   564→        <FadeIn>
+   565→   565→          <span className="section-label">Nos Réalisations</span>
+   566→   566→        </FadeIn>
+   567→   567→        <FadeIn delay={0.1}>
+   568→   568→          <h2 className="text-3xl md:text-4xl lg:text-5xl font-heading text-earth mt-4 mb-16 lg:mb-20 leading-tight">
+   569→   569→            Des projets qui<br /><span className="text-terracotta">inspirent</span>
+   570→   570→          </h2>
+   571→   571→        </FadeIn>
+   572→   572→
+   573→   573→        {/* Asymmetric Grid */}
+   574→   574→        <div className="grid lg:grid-cols-12 gap-5 lg:gap-6">
+   575→   575→          {/* Large Featured Project */}
+   576→   576→          <FadeIn className="lg:col-span-7">
+   577→   577→            <div className="img-reveal relative rounded-2xl overflow-hidden aspect-[4/3] group cursor-pointer">
+   578→   578→              <Image src={PROJETS[0].img} alt={PROJETS[0].title} fill className="object-cover" sizes="(max-width: 1024px) 100vw, 58vw" />
+   579→   579→              <div className="absolute inset-0 bg-gradient-to-t from-earth/80 via-earth/20 to-transparent" />
+   580→   580→              <div className="absolute bottom-0 left-0 right-0 p-8 lg:p-10">
+   581→   581→                <span className="text-terracotta-light text-xs font-semibold tracking-[0.2em] uppercase">{PROJETS[0].location}</span>
+   582→   582→                <h3 className="text-2xl lg:text-3xl font-heading text-cream mt-2 mb-3">{PROJETS[0].title}</h3>
+   583→   583→                <p className="text-cream/60 text-sm max-w-md leading-relaxed">{PROJETS[0].desc}</p>
+   584→   584→              </div>
+   585→   585→            </div>
+   586→   586→          </FadeIn>
+   587→   587→
+   588→   588→          {/* Stacked Right Projects */}
+   589→   589→          <div className="lg:col-span-5 flex flex-col gap-5 lg:gap-6">
+   590→   590→            {PROJETS.slice(1).map((p, i) => (
+   591→   591→              <FadeIn key={p.title} delay={0.15 + i * 0.1}>
+   592→   592→                <div className="img-reveal relative rounded-2xl overflow-hidden aspect-[16/10] group cursor-pointer">
+   593→   593→                  <Image src={p.img} alt={p.title} fill className="object-cover" sizes="(max-width: 1024px) 100vw, 42vw" />
+   594→   594→                  <div className="absolute inset-0 bg-gradient-to-t from-earth/80 via-earth/10 to-transparent" />
+   595→   595→                  <div className="absolute bottom-0 left-0 right-0 p-6 lg:p-8">
+   596→   596→                    <span className="text-terracotta-light text-xs font-semibold tracking-[0.2em] uppercase">{p.location}</span>
+   597→   597→                    <h3 className="text-xl font-heading text-cream mt-1.5 mb-2">{p.title}</h3>
+   598→   598→                    <p className="text-cream/50 text-sm leading-relaxed line-clamp-2">{p.desc}</p>
+   599→   599→                  </div>
+   600→   600→                </div>
+   601→   601→              </FadeIn>
+   602→   602→            ))}
+   603→   603→          </div>
+   604→   604→        </div>
+   605→   605→      </div>
+   606→   606→    </section>
+   607→   607→  )
+   608→   608→}
+   609→   609→
+   610→   610→/* ═══════════════════════════════════════════
+   611→   611→   SERVICES — Split Blocks
+   612→   612→   ═══════════════════════════════════════════ */
+   613→   613→const SERVICES = [
+   614→   614→  {
+   615→   615→    icon: Lightbulb,
+   616→   616→    title: 'Conseil & Conception',
+   617→   617→    desc: 'Accompagnement technique personnalisé pour optimiser votre projet en terre cuite. Études de faisabilité, plans détaillés et recommandations sur les meilleures solutions.',
+   618→   618→  },
+   619→   619→  {
+   620→   620→    icon: Building2,
+   621→   621→    title: 'Production Industrielle',
+   622→   622→    desc: 'Notre usine à Zogbodomey produit des briques de qualité constante, conformes aux normes internationales. Capacité de production adaptée aux projets de toute envergure.',
+   623→   623→  },
+   624→   624→  {
+   625→   625→    icon: HardHat,
+   626→   626→    title: 'Pôle Construction',
+   627→   627→    desc: 'Notre équipe qualifiée prend en charge la réalisation complète de votre projet, de la fondation à la finition. Garantie décennale sur tous nos ouvrages.',
+   628→   628→  },
+   629→   629→  {
+   630→   630→    icon: GraduationCap,
+   631→   631→    title: 'Formation & Transfer',
+   632→   632→    desc: 'Programmes de formation pour professionnels de la construction. Maîtrise de la technique de pose des briques en terre cuite et bonnes pratiques du bâtiment durable.',
+   633→   633→  },
+   634→   634→]
+   635→   635→
+   636→   636→function Services() {
+   637→   637→  return (
+   638→   638→    <section id="services" className="relative py-24 lg:py-32 bg-cream-dark grain-overlay overflow-hidden">
+   639→   639→      <div className="relative z-[3] max-w-7xl mx-auto px-6 lg:px-10">
+   640→   640→        <FadeIn>
+   641→   641→          <span className="section-label">Nos Services</span>
+   642→   642→        </FadeIn>
+   643→   643→        <FadeIn delay={0.1}>
+   644→   644→          <h2 className="text-3xl md:text-4xl lg:text-5xl font-heading text-earth mt-4 mb-16 lg:mb-20 leading-tight">
+   645→   645→            Un accompagnement<br /><span className="text-terracotta">complet</span>
+   646→   646→          </h2>
+   647→   647→        </FadeIn>
+   648→   648→
+   649→   649→        <div className="space-y-0">
+   650→   650→          {SERVICES.map((s, i) => (
+   651→   651→            <FadeIn key={s.title} delay={i * 0.08}>
+   652→   652→              <div className="group flex flex-col lg:flex-row lg:items-center gap-6 lg:gap-12 py-8 lg:py-10 border-b border-earth/8 first:border-t cursor-pointer">
+   653→   653→                {/* Number */}
+   654→   654→                <span className="text-earth/15 font-heading text-3xl lg:text-4xl lg:w-16 shrink-0">
+   655→   655→                  0{i + 1}
+   656→   656→                </span>
+   657→   657→
+   658→   658→                {/* Icon */}
+   659→   659→                <div className="w-14 h-14 rounded-2xl bg-terracotta/8 flex items-center justify-center shrink-0 group-hover:bg-terracotta group-hover:scale-110 transition-all duration-500">
+   660→   660→                  <s.icon size={24} className="text-terracotta group-hover:text-white transition-colors duration-500" />
+   661→   661→                </div>
+   662→   662→
+   663→   663→                {/* Text */}
+   664→   664→                <div className="flex-1">
+   665→   665→                  <h3 className="text-xl lg:text-2xl font-heading text-earth mb-2 group-hover:text-terracotta transition-colors duration-300">
+   666→   666→                    {s.title}
+   667→   667→                  </h3>
+   668→   668→                  <p className="text-warm-gray text-sm leading-relaxed max-w-2xl">{s.desc}</p>
+   669→   669→                </div>
+   670→   670→
+   671→   671→                {/* Arrow */}
+   672→   672→                <div className="hidden lg:flex w-10 h-10 rounded-full border border-earth/10 items-center justify-center group-hover:bg-terracotta group-hover:border-terracotta transition-all duration-500">
+   673→   673→                  <ArrowUpRight size={16} className="text-earth/30 group-hover:text-white transition-colors duration-500" />
+   674→   674→                </div>
+   675→   675→              </div>
+   676→   676→            </FadeIn>
+   677→   677→          ))}
+   678→   678→        </div>
+   679→   679→      </div>
+   680→   680→    </section>
+   681→   681→  )
+   682→   682→}
+   683→   683→
+   684→   684→/* ═══════════════════════════════════════════
+   685→   685→   STATS + FOUNDER
+   686→   686→   ═══════════════════════════════════════════ */
+   687→   687→function StatsFounder() {
+   688→   688→  const stats = [
+   689→   689→    { value: 13, suffix: '+', label: "Années d'expertise" },
+   690→   690→    { value: 500, suffix: '+', label: 'Projets réalisés' },
+   691→   691→    { value: 25, suffix: '+', label: 'Collaborateurs' },
+   692→   692→    { value: 100, suffix: '%', label: 'Terre cuite naturelle' },
+   693→   693→  ]
+   694→   694→
+   695→   695→  return (
+   696→   696→    <section id="apropos" className="relative">
+   697→   697→      {/* Split: Image Left, Content Right */}
+   698→   698→      <div className="grid lg:grid-cols-2 min-h-[600px]">
+   699→   699→        {/* Image Side */}
+   700→   700→        <FadeIn className="relative overflow-hidden">
+   701→   701→          <Image
+   702→   702→            src="/images/nb/about-team.jpg"
+   703→   703→            alt="Équipe Nature Brique"
+   704→   704→            fill
+   705→   705→            className="object-cover"
+   706→   706→            sizes="(max-width: 1024px) 100vw, 50vw"
+   707→   707→          />
+   708→   708→          <div className="absolute inset-0 grain-overlay-dark" />
+   709→   709→          {/* Floating stat card */}
+   710→   710→          <div className="absolute bottom-6 left-6 right-6 sm:bottom-10 sm:left-10 sm:right-auto glass-card rounded-2xl p-6 z-[3]">
+   711→   711→            <p className="text-cream/60 text-xs font-semibold tracking-widest uppercase mb-2">Notre engagement</p>
+   712→   712→            <p className="text-cream text-lg font-heading leading-snug">
+   713→   713→              &laquo; Chaque brique que nous produisons porte la promesse d&apos;un avenir plus durable. &raquo;
+   714→   714→            </p>
+   715→   715→          </div>
+   716→   716→        </FadeIn>
+   717→   717→
+   718→   718→        {/* Content Side */}
+   719→   719→        <div className="bg-earth grain-overlay-dark flex flex-col justify-center px-8 lg:px-16 py-16 lg:py-0">
+   720→   720→          <FadeIn>
+   721→   721→            <span className="section-label">À propos</span>
+   722→   722→          </FadeIn>
+   723→   723→          <FadeIn delay={0.1}>
+   724→   724→            <h2 className="text-3xl md:text-4xl lg:text-5xl font-heading text-cream mt-4 mb-6 leading-tight">
+   725→   725→              Pionniers de la<br />terre cuite au <span className="text-terracotta">Bénin</span>
+   726→   726→            </h2>
+   727→   727→          </FadeIn>
+   728→   728→          <FadeIn delay={0.2}>
+   729→   729→            <p className="text-cream/50 leading-relaxed mb-4">
+   730→   730→              Fondée en 2011 par Franck Kidjo, Nature Brique est la première industrie céramique du Bénin. Nous transformons l&apos;argile locale en briques de qualité supérieure pour répondre aux défis de la construction durable en Afrique de l&apos;Ouest.
+   731→   731→            </p>
+   732→   732→          </FadeIn>
+   733→   733→          <FadeIn delay={0.25}>
+   734→   734→            <p className="text-cream/50 leading-relaxed mb-10">
+   735→   735→              De notre siège social à Cotonou à notre usine de production à Zogbodomey, nous maîtrisons l&apos;intégralité de la chaîne de valeur : de l&apos;extraction de l&apos;argile à la cuisson, en passant par le moulage et le contrôle qualité.
+   736→   736→            </p>
+   737→   737→          </FadeIn>
+   738→   738→
+   739→   739→          {/* Stats Grid */}
+   740→   740→          <StaggerGroup className="grid grid-cols-2 gap-6 lg:gap-8" stagger={0.1}>
+   741→   741→            {stats.map((s) => (
+   742→   742→              <motion.div key={s.label} variants={staggerItem} className="border-t border-cream/10 pt-4">
+   743→   743→                <div className="text-3xl lg:text-4xl text-terracotta mb-1">
+   744→   744→                  <Counter end={s.value} suffix={s.suffix} />
+   745→   745→                </div>
+   746→   746→                <p className="text-cream/40 text-xs font-semibold tracking-widest uppercase">{s.label}</p>
+   747→   747→              </motion.div>
+   748→   748→            ))}
+   749→   749→          </StaggerGroup>
+   750→   750→        </div>
+   751→   751→      </div>
+   752→   752→    </section>
+   753→   753→  )
+   754→   754→}
+   755→   755→
+   756→   756→/* ═══════════════════════════════════════════
+   757→   757→   QUOTE / MISSION SECTION
+   758→   758→   ═══════════════════════════════════════════ */
+   759→   759→function MissionSection() {
+   760→   760→  return (
+   761→   761→    <section className="relative py-20 lg:py-28 bg-cream grain-overlay overflow-hidden">
+   762→   762→      <div className="relative z-[3] max-w-4xl mx-auto px-6 lg:px-10 text-center">
+   763→   763→        <FadeIn>
+   764→   764→          <Quote size={48} className="text-terracotta/20 mx-auto mb-6" />
+   765→   765→        </FadeIn>
+   766→   766→        <FadeIn delay={0.1}>
+   767→   767→          <blockquote className="text-2xl md:text-3xl lg:text-4xl font-heading text-earth leading-snug mb-8">
+   768→   768→            La terre cuite n&apos;est pas un matériau du passé — c&apos;est le matériau de l&apos;avenir. Naturel, performant, intemporel.
+   769→   769→          </blockquote>
+   770→   770→        </FadeIn>
+   771→   771→        <FadeIn delay={0.2}>
+   772→   772→          <div className="flex items-center justify-center gap-3">
+   773→   773→            <div className="w-10 h-10 rounded-full bg-terracotta/10 flex items-center justify-center">
+   774→   774→              <Award size={18} className="text-terracotta" />
+   775→   775→            </div>
+   776→   776→            <div className="text-left">
+   777→   777→              <p className="text-earth font-semibold text-sm">Franck Kidjo</p>
+   778→   778→              <p className="text-warm-gray text-xs">Fondateur & Directeur Général</p>
+   779→   779→            </div>
+   780→   780→          </div>
+   781→   781→        </FadeIn>
+   782→   782→      </div>
+   783→   783→    </section>
+   784→   784→  )
+   785→   785→}
+   786→   786→
+   787→   787→/* ═══════════════════════════════════════════
+   788→   788→   CTA SECTION
+   789→   789→   ═══════════════════════════════════════════ */
+   790→   790→function CtaSection() {
+   791→   791→  return (
+   792→   792→    <section id="contact" className="relative py-24 lg:py-32 overflow-hidden">
+   793→   793→      {/* Background */}
+   794→   794→      <Image src="/images/nb/work-site2.jpg" alt="Chantier Nature Brique" fill className="object-cover" />
+   795→   795→      <div className="absolute inset-0 bg-earth/85" />
+   796→   796→      <div className="absolute inset-0 grain-overlay-dark" />
+   797→   797→
+   798→   798→      <div className="relative z-[3] max-w-3xl mx-auto px-6 lg:px-10 text-center">
+   799→   799→        <FadeIn>
+   800→   800→          <span className="section-label !text-terracotta-light">Passons à l'action</span>
+   801→   801→        </FadeIn>
+   802→   802→        <FadeIn delay={0.1}>
+   803→   803→          <h2 className="text-3xl md:text-4xl lg:text-5xl font-heading text-cream mt-4 mb-6 leading-tight">
+   804→   804→            Votre projet en terre cuite<br />commence <span className="text-terracotta-light">ici</span>
+   805→   805→          </h2>
+   806→   806→        </FadeIn>
+   807→   807→        <FadeIn delay={0.2}>
+   808→   808→          <p className="text-cream/50 text-base leading-relaxed mb-10 max-w-xl mx-auto">
+   809→   809→            Contactez notre équipe pour discuter de votre projet. Devis gratuit, conseil personnalisé et accompagnement de A à Z.
+   810→   810→          </p>
+   811→   811→        </FadeIn>
+   812→   812→        <FadeIn delay={0.3}>
+   813→   813→          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+   814→   814→            <a href="tel:+22996505057" className="btn-premium bg-terracotta text-white px-8 py-4 rounded-full font-semibold text-sm tracking-wide flex items-center justify-center gap-2">
+   815→   815→              <Phone size={16} />
+   816→   816→              +229 96 50 50 57
+   817→   817→            </a>
+   818→   818→            <a href="mailto:info@naturebrique.com" className="btn-premium bg-white/10 backdrop-blur-sm text-white border border-white/20 px-8 py-4 rounded-full font-semibold text-sm tracking-wide flex items-center justify-center gap-2 hover:bg-white/20">
+   819→   819→              <Mail size={16} />
+   820→   820→              info@naturebrique.com
+   821→   821→            </a>
+   822→   822→          </div>
+   823→   823→        </FadeIn>
+   824→   824→      </div>
+   825→   825→    </section>
+   826→   826→  )
+   827→   827→}
+   828→   828→
+   829→   829→/* ═══════════════════════════════════════════
+   830→   830→   FOOTER
+   831→   831→   ═══════════════════════════════════════════ */
+   832→   832→function Footer() {
+   833→   833→  return (
+   834→   834→    <footer className="bg-earth grain-overlay-dark">
+   835→   835→      <div className="relative z-[3] max-w-7xl mx-auto px-6 lg:px-10 py-16 lg:py-20">
+   836→   836→        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8">
+   837→   837→          {/* Brand */}
+   838→   838→          <div className="sm:col-span-2 lg:col-span-1">
+   839→   839→            <Image src="/images/logo.png" alt="Nature Brique" width={140} height={35} className="h-8 w-auto mb-5 brightness-0 invert" />
+   840→   840→            <p className="text-cream/40 text-sm leading-relaxed mb-6">
+   841→   841→              Première industrie céramique du Bénin. Construisons ensemble un avenir écologique.
+   842→   842→            </p>
+   843→   843→            <div className="flex gap-3">
+   844→   844→              <a href="https://www.facebook.com/naturebrique.net" target="_blank" rel="noopener" className="w-10 h-10 rounded-full border border-cream/15 flex items-center justify-center text-cream/40 hover:text-cream hover:border-terracotta hover:bg-terracotta/10 transition-all duration-300">
+   845→   845→                <Facebook size={16} />
+   846→   846→              </a>
+   847→   847→              <a href="https://www.instagram.com/naturebrique" target="_blank" rel="noopener" className="w-10 h-10 rounded-full border border-cream/15 flex items-center justify-center text-cream/40 hover:text-cream hover:border-terracotta hover:bg-terracotta/10 transition-all duration-300">
+   848→   848→                <Instagram size={16} />
+   849→   849→              </a>
+   850→   850→              <a href="https://wa.me/22996505057" target="_blank" rel="noopener" className="w-10 h-10 rounded-full border border-cream/15 flex items-center justify-center text-cream/40 hover:text-cream hover:border-terracotta hover:bg-terracotta/10 transition-all duration-300">
+   851→   851→                <MessageCircle size={16} />
+   852→   852→              </a>
+   853→   853→            </div>
+   854→   854→          </div>
+   855→   855→
+   856→   856→          {/* Navigation */}
+   857→   857→          <div>
+   858→   858→            <h4 className="text-cream font-semibold text-sm tracking-widest uppercase mb-5">Navigation</h4>
+   859→   859→            <ul className="space-y-3">
+   860→   860→              {NAV_LINKS.map((link) => (
+   861→   861→                <li key={link.href}>
+   862→   862→                  <a href={link.href} className="text-cream/40 text-sm hover:text-terracotta transition-colors duration-300">
+   863→   863→                    {link.label}
+   864→   864→                  </a>
+   865→   865→                </li>
+   866→   866→              ))}
+   867→   867→            </ul>
+   868→   868→          </div>
+   869→   869→
+   870→   870→          {/* Contact */}
+   871→   871→          <div>
+   872→   872→            <h4 className="text-cream font-semibold text-sm tracking-widest uppercase mb-5">Contact</h4>
+   873→   873→            <ul className="space-y-3">
+   874→   874→              <li>
+   875→   875→                <a href="tel:+22996505057" className="text-cream/40 text-sm hover:text-terracotta transition-colors flex items-center gap-2">
+   876→   876→                  <Phone size={14} /> +229 96 50 50 57
+   877→   877→                </a>
+   878→   878→              </li>
+   879→   879→              <li>
+   880→   880→                <a href="mailto:info@naturebrique.com" className="text-cream/40 text-sm hover:text-terracotta transition-colors flex items-center gap-2">
+   881→   881→                  <Mail size={14} /> info@naturebrique.com
+   882→   882→                </a>
+   883→   883→              </li>
+   884→   884→              <li>
+   885→   885→                <span className="text-cream/40 text-sm flex items-start gap-2">
+   886→   886→                  <MapPin size={14} className="shrink-0 mt-0.5" /> Lot 3614 Fidjrosse-Houta, Cotonou, Bénin
+   887→   887→                </span>
+   888→   888→              </li>
+   889→   889→              <li>
+   890→   890→                <span className="text-cream/40 text-sm flex items-center gap-2">
+   891→   891→                  <Clock size={14} /> Lun-Ven : 8h - 18h
+   892→   892→                </span>
+   893→   893→              </li>
+   894→   894→            </ul>
+   895→   895→          </div>
+   896→   896→
+   897→   897→          {/* Usine */}
+   898→   898→          <div>
+   899→   899→            <h4 className="text-cream font-semibold text-sm tracking-widest uppercase mb-5">Usine</h4>
+   900→   900→            <div className="space-y-3 text-cream/40 text-sm">
+   901→   901→              <p className="flex items-start gap-2">
+   902→   902→                <MapPin size={14} className="shrink-0 mt-0.5" />
+   903→   903→                Zone de Tanwé Hessou, Zogbodomey, Bénin
+   904→   904→              </p>
+   905→   905→              <p className="mt-4 text-cream/25 text-xs leading-relaxed">
+   906→   906→                Visites d&apos;usine possibles sur rendez-vous. Contactez-nous pour organiser votre visite.
+   907→   907→              </p>
+   908→   908→            </div>
+   909→   909→          </div>
+   910→   910→        </div>
+   911→   911→
+   912→   912→        {/* Bottom Bar */}
+   913→   913→        <div className="mt-16 pt-8 border-t border-cream/8 flex flex-col sm:flex-row justify-between items-center gap-4">
+   914→   914→          <p className="text-cream/25 text-xs">
+   915→   915→            &copy; {new Date().getFullYear()} Nature Brique. Tous droits réservés.
+   916→   916→          </p>
+   917→   917→          <p className="text-cream/25 text-xs">
+   918→   918→            Première industrie céramique du Bénin depuis 2011
+   919→   919→          </p>
+   920→   920→        </div>
+   921→   921→      </div>
+   922→   922→    </footer>
+   923→   923→  )
+   924→   924→}
+   925→   925→
+   926→   926→/* ═══════════════════════════════════════════
+   927→   927→   PHOTO MOSAIC STRIP
+   928→   928→   ═══════════════════════════════════════════ */
+   929→   929→const MOSAIC_IMGS = [
+   930→   930→  { src: '/images/nb/facade3.jpg', span: 'row-span-2' },
+   931→   931→  { src: '/images/nb/brick-detail2.jpg', span: '' },
+   932→   932→  { src: '/images/nb/work-site3.jpg', span: '' },
+   933→   933→  { src: '/images/nb/ext-3.jpg', span: 'col-span-2' },
+   934→   934→  { src: '/images/nb/facade4.jpg', span: '' },
+   935→   935→]
+   936→   936→
+   937→   937→function PhotoMosaic() {
+   938→   938→  return (
+   939→   939→    <section className="relative py-2 lg:py-4 bg-earth-dark">
+   940→   940→      <div className="max-w-7xl mx-auto px-4 lg:px-10 grid grid-cols-2 md:grid-cols-4 gap-1.5 lg:gap-2 auto-rows-[120px] md:auto-rows-[160px] lg:auto-rows-[200px]">
+   941→   941→        {MOSAIC_IMGS.map((img, i) => (
+   942→   942→          <FadeIn key={img.src} delay={i * 0.06} className={`img-reveal rounded-lg overflow-hidden ${img.span}`}>
+   943→   943→            <Image src={img.src} alt="" fill className="object-cover grayscale-[20%] hover:grayscale-0 transition-all duration-700 hover:scale-105" sizes="400px" />
+   944→   944→          </FadeIn>
+   945→   945→        ))}
+   946→   946→      </div>
+   947→   947→    </section>
+   948→   948→  )
+   949→   949→}
+   950→   950→
+   951→   951→/* ═══════════════════════════════════════════
+   952→   952→   PROCESS SECTION — How we work
+   953→   953→   ═══════════════════════════════════════════ */
+   954→   954→const PROCESS_STEPS = [
+   955→   955→  { num: '01', title: 'Consultation', desc: 'Échange avec notre équipe pour comprendre vos besoins, votre budget et vos contraintes.' },
+   956→   956→  { num: '02', title: 'Conception', desc: 'Étude technique et recommandations sur les solutions les plus adaptées à votre projet.' },
+   957→   957→  { num: '03', title: 'Production', desc: 'Fabrication de vos briques dans notre usine à Zogbodomey avec contrôle qualité rigoureux.' },
+   958→   958→  { num: '04', title: 'Réalisation', desc: 'Pose professionnelle par notre pôle construction avec garantie décennale sur tous nos ouvrages.' },
+   959→   959→]
+   960→   960→
+   961→   961→function ProcessSection() {
+   962→   962→  return (
+   963→   963→    <section className="relative py-20 lg:py-28 bg-cream grain-overlay overflow-hidden">
+   964→   964→      <div className="relative z-[3] max-w-7xl mx-auto px-6 lg:px-10">
+   965→   965→        <div className="text-center mb-16">
+   966→   966→          <FadeIn>
+   967→   967→            <span className="section-label justify-center">Notre Processus</span>
+   968→   968→          </FadeIn>
+   969→   969→          <FadeIn delay={0.1}>
+   970→   970→            <h2 className="text-3xl md:text-4xl lg:text-5xl font-heading text-earth mt-4 leading-tight">
+   971→   971→              De l&apos;idée à la <span className="text-terracotta">réalité</span>
+   972→   972→            </h2>
+   973→   973→          </FadeIn>
+   974→   974→        </div>
+   975→   975→
+   976→   976→        <StaggerGroup className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8" stagger={0.12}>
+   977→   977→          {PROCESS_STEPS.map((step) => (
+   978→   978→            <motion.div key={step.num} variants={staggerItem} className="relative group">
+   979→   979→              {/* Connector line */}
+   980→   980→              <div className="hidden lg:block absolute top-8 left-[calc(50%+2rem)] right-[-calc(50%+2rem)] w-[calc(100%-4rem)] h-px bg-earth/8 -translate-x-0" />
+   981→   981→              <span className="text-5xl lg:text-6xl font-heading text-earth/[0.06] group-hover:text-terracotta/20 transition-colors duration-500">{step.num}</span>
+   982→   982→              <h3 className="text-xl font-heading text-earth mt-2 mb-3 group-hover:text-terracotta transition-colors duration-300">{step.title}</h3>
+   983→   983→              <p className="text-warm-gray text-sm leading-relaxed">{step.desc}</p>
+   984→   984→            </motion.div>
+   985→   985→          ))}
+   986→   986→        </StaggerGroup>
+   987→   987→      </div>
+   988→   988→    </section>
+   989→   989→  )
+   990→   990→}
+   991→   991→
+   992→   992→/* ═══════════════════════════════════════════
+   993→   993→   PAGE
+   994→   994→   ═══════════════════════════════════════════ */
+   995→   995→export default function HomePage() {
+   996→   996→  return (
+   997→   997→    <main className="overflow-x-hidden">
+   998→   998→      <Navigation />
+   999→   999→      <Hero />
+  1000→  1000→      <TrustBar />
+  1001→  1001→      <Avantages />
+  1002→  1002→      <PhotoMosaic />
+  1003→  1003→      <Solutions />
+  1004→  1004→      <Travaux />
+  1005→  1005→      <ProcessSection />
+  1006→  1006→      <Services />
+  1007→  1007→      <StatsFounder />
+  1008→  1008→      <MissionSection />
+  1009→  1009→      <CtaSection />
+  1010→  1010→      <Footer />
+  1011→  1011→    </main>
+  1012→  1012→  )
+  1013→  1013→}
