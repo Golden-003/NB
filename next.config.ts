@@ -7,7 +7,7 @@ const nextConfig: NextConfig = {
   },
   reactStrictMode: false,
   images: {
-    qualities: [75, 85, 90],
+    unoptimized: true,
   },
 };
 
